@@ -126,26 +126,22 @@ Please ensure all contributions align with our coding standards and include prop
 
 This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) for details.
 
-## Acknowledgments
-
-Special thanks to:
-- [Your Name] - Project Lead
-- [Mentor Name] - Academic Advisor
-- NEU IT Department - Infrastructure Support
-
+## Team
+- [Macorol] - Scrum Master
+- [Mancera] 
+- [Macalanda]
+- [Salenga]
+- [Cabanilla]
+  
 ## Contact
 
 For questions or concerns, please contact:
-[Your Email](mailto:your.email@example.com)
+[Renard Macorol](rmacorol18@gmail.com)
 
 ## Changelog
 
-v1.0.0 - Initial Release
-- Basic CRUD operations implemented
-- Authentication system integrated
-- Search functionality added
+v0.0.0 - Planning
+- Finalized System Design
+- Finalized Primary Assets
+- Static Implementation
 
-v1.1.0 - Feature Update
-- Citation generator implemented
-- PDF preview system enhanced
-- Mobile optimization added
