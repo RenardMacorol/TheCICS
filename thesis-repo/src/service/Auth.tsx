@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 const Auth = () => {
     const navigate = useNavigate();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-    const [user,setUser] = useState<any>(null);
+    const [,setUser] = useState<any>(null);
          
      useEffect(() => {
     const checkUser = async () => {
