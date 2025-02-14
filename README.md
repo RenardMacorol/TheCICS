@@ -128,10 +128,11 @@ This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) fo
 
 ## Team
 - [Macorol] - Scrum Master
-- [Mancera] 
-- [Macalanda]
-- [Salenga]
-- [Cabanilla]
+- [Cabanilla] - Developr 1
+- [Macalanda] - Developer 2
+- [Mancera] - Analyst
+- [Salenga] - Tester
+
   
 ## Contact
 
