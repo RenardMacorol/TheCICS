@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import './App.css'
-import { supabase } from '../supabase';
+import { supabase } from './api/supabase';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Auth from './service/Auth';
-import Dashboard from './service/Dashboard';
+import Auth from './components/Login';
+import Dashboard from './components/Dashboard';
 
 
 const App = () => {
