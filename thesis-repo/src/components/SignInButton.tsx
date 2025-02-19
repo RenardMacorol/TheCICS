@@ -25,14 +25,11 @@ const SignIn = () => {
 
 
   return (
-    <div className='flex items-center justify-center min-h-screen bg-gray-100'>
-      <div className='flex bg-white p-8 rounded-lg shadow-lg w-96 text-center items-center'>
-      <h2 className='font-semibold'>Welcome to Thesis Repository</h2>
-      <button className="flex items-center rounded-lg  bg-blue-400 hover:bg-blue-600"onClick={Login}>
+    <div className='m-10 flex items-center justify-center  bg-white-100'>
+      <button className="p-5 flex items-center rounded-lg  bg-blue-400 hover:bg-blue-500"onClick={Login}>
         <img className="w-5 h-5" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"></img>
         <span >Sign in with Google </span>
         </button>
-      </div>
     </div>
   );
 
