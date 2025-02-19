@@ -7,7 +7,7 @@ const SignInPage = () => {
             <div className="w-1/2 bg-gray-300 relative">
                 {/*Bg image */}
                 <img className="w-full h-full object-cover"
-                src="\src\assets\MockAsset\AnimeLogin.jpg"/>
+                src="/AnimeLogin.jpg"/>
                 <div className="absolute top-6 left-6 flex items-center
                 gap-3 bg-gray-800 bg-opacity-60 p-3 rounded-lg">
                     <div className="w-1/2 bg-gray-300 flex flex-row ">
