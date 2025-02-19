@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import './App.css'
 import { supabase } from './api/supabase';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Auth from './components/Login';
-import Dashboard from './components/Dashboard';
+import Dashboard from './pages/DashboardThesis';
+import LandingPage from './pages/LandingPage';
+import SignInPage from './pages/SignInPage';
+import SignUpPage from './pages/SignUpPage';
 
 
 const App = () => {
@@ -26,9 +28,10 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Auth />} />
+        <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LandingPage />} />
         <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
-        <Route path="/Auth" element={<Auth />} />
+        <Route path='/SignInPage' element={<SignInPage/>}/>
+        <Route path='/SignUpPage' element={<SignUpPage/>}/>
       </Routes>
     </Router>
   );
