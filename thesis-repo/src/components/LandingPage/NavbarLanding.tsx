@@ -14,7 +14,7 @@ const NavBarLanding = () => {
             <span className="text-4xl font-semibold">TheCICS</span>
             </div>
             <div className="flex gap-8">
-            <button className="bg-blue-400 text-2xl rounded-3xl"onClick={handleSignIn}>Sign-In</button>
+            <button className="p-3 bg-blue-400 text-2xl rounded-3xl"onClick={handleSignIn}>Sign-In</button>
             <SwitchTheme/>
             </div>
         </nav>

@@ -18,11 +18,22 @@ const App = () => {
       if (data?.user && data.user.email?.endsWith("@neu.edu.ph")) {
         setUser(data.user);
       } else {
-        await supabase.auth.signOut();
+        setUser(null)
       }
     };
-
+// Listen for authentication state changes
+const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+  if (session?.user && session.user.email?.endsWith("@neu.edu.ph")) {
+    setUser(session.user);
+  } else {
+    setUser(null);
+  }
+});
     fetchUser();
+
+  return () => {
+    authListener.subscription.unsubscribe();
+  }
   }, []);
 
   return (
