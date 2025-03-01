@@ -3,17 +3,13 @@ import { supabase } from "../../api/supabase";
 
 type Thesis = {
     thesisID: string;
+    authorID: number;
     title: string;
     abstract: string;
     publicationYear: number;
     keywords: string;
     pdfFileUrl: string;
     status: string;
-    author: {
-        authorID: string;
-        firstName: string;
-        lastName: string;
-    }
 }
 
 const ContentList = () => {
@@ -24,6 +20,7 @@ const ContentList = () => {
             const { data, error } = await supabase
                 .from("Thesis")
                 .select("*")
+                .eq('status','Active')
 
             if (error) {
                 console.error("Error fetching theses:", error);
