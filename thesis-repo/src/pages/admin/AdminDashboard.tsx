@@ -12,14 +12,29 @@ interface User {
   dateRegistered: string;
 }
 
+interface Thesis {
+  thesisID: number;
+  authorID: number;
+  title: string;
+  abstract: string;
+  publicationYear: string;
+  keywords: string;
+  pdfFileUrl: string;
+  status: "Active" | "Inactive"; // Based on ThesisStatusEnums
+}
+
+
 const AdminDashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [newUser, setNewUser] = useState({ name: "", email: "", role: "Student" });
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [theses, setTheses] = useState<Thesis[]>([]);
+  const [loadingTheses, setLoadingTheses] = useState(true);
 
   useEffect(() => {
     fetchUsers();
+    fetchTheses();
   }, []);
 
   const fetchUsers = async () => {
@@ -34,6 +49,14 @@ const AdminDashboard = () => {
       setUsers(data || []);
     }
     setLoading(false);
+  };
+
+  const fetchTheses = async () => {
+    setLoadingTheses(true);
+    const { data, error } = await supabase.from("Thesis").select("*");
+    if (error) console.error("Error fetching theses:", error);
+    else setTheses(data || []);
+    setLoadingTheses(false);
   };
   
 
@@ -96,6 +119,60 @@ const AdminDashboard = () => {
       setEditingUser(null);
     }
   };
+
+  // Approve Thesis
+const handleApproveThesis = async (thesisID: number) => {
+  console.log("🔄 Attempting to approve thesis with ID:", thesisID);
+  const { data, error } = await supabase
+    .from("Thesis")
+    .update({ status: "Active" })
+    .eq("thesisID", thesisID)
+    .select(); // Fetch updated data after the operation
+
+  if (error) {
+    console.error("❌ Error approving thesis:", error);
+  } else {
+    console.log("✅ Thesis approved successfully:", data);
+    setTheses(theses.map((thesis) =>
+      thesis.thesisID === thesisID ? { ...thesis, status: "Active" } : thesis
+    ));
+  }
+};
+
+// Restrict Thesis
+const handleRestrictThesis = async (thesisID: number) => {
+  console.log("🔄 Attempting to restrict thesis with ID:", thesisID);
+  const { data, error } = await supabase
+    .from("Thesis")
+    .update({ status: "Inactive" })
+    .eq("thesisID", thesisID)
+    .select(); // Fetch updated data
+
+  if (error) {
+    console.error("❌ Error restricting thesis:", error);
+  } else {
+    console.log("✅ Thesis restricted successfully:", data);
+    setTheses(theses.map((thesis) =>
+      thesis.thesisID === thesisID ? { ...thesis, status: "Inactive" } : thesis
+    ));
+  }
+};
+
+// Delete Thesis
+const handleDeleteThesis = async (thesisID: number) => {
+  console.log("🔄 Attempting to delete thesis with ID:", thesisID);
+  const { error } = await supabase
+    .from("Thesis")
+    .delete()
+    .eq("thesisID", thesisID);
+
+  if (error) {
+    console.error("❌ Error deleting thesis:", error);
+  } else {
+    console.log("✅ Thesis deleted successfully");
+    setTheses(theses.filter((thesis) => thesis.thesisID !== thesisID));
+  }
+};
   
   
   
@@ -164,6 +241,35 @@ const AdminDashboard = () => {
           <button className="bg-blue-500 text-white p-2 rounded" onClick={handleUpdateUser}>Save Changes</button>
           <button className="ml-2 bg-gray-500 text-white p-2 rounded" onClick={() => setEditingUser(null)}>Cancel</button>
         </div>
+      )}
+
+      {/* Thesis Management */}
+      <h2 className="text-xl font-semibold mt-5">Manage Theses</h2>
+      {loadingTheses ? <p>Loading theses...</p> : (
+        <table className="w-full border-collapse border mt-2">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border p-2">Thesis ID</th>
+              <th className="border p-2">Title</th>
+              <th className="border p-2">Status</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {theses.map((thesis) => (
+              <tr key={thesis.thesisID} className="border">
+                <td className="border p-2">{thesis.thesisID}</td>
+                <td className="border p-2">{thesis.title}</td>
+                <td className="border p-2">{thesis.status}</td>
+                <td className="border p-2">
+                  <button className="bg-green-500 text-white p-1 rounded m-1" onClick={() => handleApproveThesis(thesis.thesisID)}>Approve</button>
+                  <button className="bg-yellow-500 text-white p-1 rounded m-1" onClick={() => handleRestrictThesis(thesis.thesisID)}>Restrict</button>
+                  <button className="bg-red-500 text-white p-1 rounded m-1" onClick={() => handleDeleteThesis(thesis.thesisID)}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
