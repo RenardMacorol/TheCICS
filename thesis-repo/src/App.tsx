@@ -6,7 +6,10 @@ import Dashboard from './pages/DashboardThesis';
 import LandingPage from './pages/LandingPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+<<<<<<< HEAD
 import AdminDashboard from './pages/admin/AdminDashboard';
+=======
+>>>>>>> origin/main
 
 
 const App = () => {
@@ -44,7 +47,10 @@ const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
         <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
         <Route path='/SignInPage' element={<SignInPage/>}/>
         <Route path='/SignUpPage' element={<SignUpPage/>}/>
+<<<<<<< HEAD
         <Route path='/admin' element={<AdminDashboard/>}/>
+=======
+>>>>>>> origin/main
       </Routes>
     </Router>
   );
