@@ -5,8 +5,4 @@ const Login = async() => {
 }
 
 
-<<<<<<< HEAD
 export default Login;
-=======
-export default Login;
->>>>>>> origin/main
