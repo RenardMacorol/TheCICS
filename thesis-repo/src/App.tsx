@@ -6,17 +6,13 @@ import Dashboard from './pages/DashboardThesis';
 import LandingPage from './pages/LandingPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
-<<<<<<< HEAD
-import AdminDashboard from './pages/admin/AdminDashboard';
-=======
->>>>>>> origin/main
 
 
 const App = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
 
-  useEffect(() => {
+  useEffect(() => { 
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
       if (data?.user && data.user.email?.endsWith("@neu.edu.ph")) {
@@ -47,10 +43,6 @@ const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
         <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
         <Route path='/SignInPage' element={<SignInPage/>}/>
         <Route path='/SignUpPage' element={<SignUpPage/>}/>
-<<<<<<< HEAD
-        <Route path='/admin' element={<AdminDashboard/>}/>
-=======
->>>>>>> origin/main
       </Routes>
     </Router>
   );
