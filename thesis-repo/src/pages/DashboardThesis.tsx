@@ -8,40 +8,6 @@ import FilterButton from "../components/DashThesis/FilterButton";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [, setUser] = useState<User |null>(null);
-<<<<<<< HEAD
-  const [, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-
-      if (error||!user || !user.email?.endsWith("@neu.edu.ph")) {
-        navigate("/"); // ✅ Redirect to login if not logged in
-      }else{
-      const fullname = user.user_metadata?.full_name || "User";
-      const {error } = await supabase.from("Users").insert({
-          userID: user.id,
-          name: fullname,
-          email: user.email,
-          role: "Student",
-          googleAuthID: user.id,
-          profilePicture: null,
-          dateRegistered: new Date().toISOString()
-        })
-        if(error) console.error("Error here", error)
-        console.log("The User Creation was success")
-
-      setUser(user);
-      setLoading(false);
- 
-      }
-      
-   };
-
-    fetchUser();
-  }, [navigate]);
-
-=======
 
   useEffect(() => {
     const fetchUser = async () =>{
@@ -54,7 +20,6 @@ const Dashboard = () => {
     }
     fetchUser()
   }, [navigate])
->>>>>>> origin/main
   
 
   return (
@@ -68,8 +33,6 @@ const Dashboard = () => {
 }
 
 export default Dashboard;
-<<<<<<< HEAD
-=======
 
 {/*
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-101">
@@ -79,4 +42,3 @@ export default Dashboard;
         </div>
       </div>
     */}
->>>>>>> origin/main
