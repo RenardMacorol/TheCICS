@@ -48,6 +48,13 @@ const DashNavTop = () => {
             <li className="p-2 flex items-center"><Settings className="mr-2"/>Settings</li>
             <li className="p-2 flex items-center"><SunMoon className="mr-2"/>Apperance</li>
             <li className="p-2 flex items-center"><CircleHelp className="mr-2"/> Help & Support</li>
+            {/* New Admin Panel Navigation */}
+          <li
+                        className="p-2 hover:bg-blue-700 cursor-pointer"
+                        onClick={() => navigate('/admin')}
+                    >
+                        🛠️ Admin Panel
+                    </li>
             <li className="p-2 flex items-center text-red-600">
                 <LogOut className="mr-2"/> 
                 <button onClick={handleLogout}>Log out</button>
