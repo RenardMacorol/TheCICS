@@ -4,7 +4,7 @@ const CicsLogo = () => {
             <img
                 src="/TheCICSFullLogo.png"
                 alt="The CICS Full Logo"
-                className="w-10 h-10 w-auto object-contain"
+                className="w-auto h-10 object-contain"
             />
         </div>
     )
