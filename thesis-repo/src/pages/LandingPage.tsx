@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import NavBarLanding from '../components/LandingPage/NavbarLanding';
 import Hero from "../components/LandingPage/Hero";
 
+
 const LandingPage = () => {  
     const [isLoaded, setIsLoaded] = useState(false);
     
@@ -34,7 +35,7 @@ const LandingPage = () => {
             </div>
             
             {/* Footer */}
-            <footer className="w-full py-3 text-center text-gray-600 bg-white bg-opacity-70 backdrop-blur-sm">
+            <footer className="w-full py-3 text-center text-violet-800 bg-white bg-opacity-70 backdrop-blur-sm">
                 <p>© 2025 TheCICS - Renard Macorol . DL Cabanilla . Pia Macalanda . Juliana Mancera</p>
             </footer>
             
