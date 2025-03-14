@@ -1,4 +1,3 @@
-// LandingPage.tsx
 import { useState, useEffect } from 'react';
 import NavBarLanding from '../components/LandingPage/NavbarLanding';
 import Hero from "../components/LandingPage/Hero";
