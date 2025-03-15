@@ -23,7 +23,7 @@ const Dashboard = () => {
           email: user.email,
           role: "Student",
           googleAuthID: user.id,
-          profilePicture: null,
+          profilePicture: user.user_metadata?.avatar_url,
           dateRegistered: new Date().toISOString()
         })
         if(error) console.error("Error here", error)
