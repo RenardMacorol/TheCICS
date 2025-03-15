@@ -30,7 +30,7 @@ const ContentList = ({searchQuery} : Search) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchTheses = async () => {
+       const fetchTheses = async () => {
             setLoading(true);
             
             // Fetch theses
@@ -231,7 +231,7 @@ const ContentList = ({searchQuery} : Search) => {
                                 <Github size={16} />
                                 <span>Code</span>
                             </button>
-                            <button className="flex items-center gap-1 bg-aqua-100 text-aqua-700 rounded-full px-3 py-1 text-sm hover:bg-aqua-200 transition-colors">
+                            <button onClick={() => window.open(item.pdfFileUrl, "_blank")}className="flex items-center gap-1 bg-aqua-100 text-aqua-700 rounded-full px-3 py-1 text-sm hover:bg-aqua-200 transition-colors">
                                 <Pencil size={16} />
                                 <span>View</span>
                             </button>
