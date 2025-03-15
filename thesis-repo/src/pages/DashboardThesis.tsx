@@ -8,6 +8,7 @@ import FilterButton from "../components/DashThesis/FilterButton";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [, setUser] = useState<User |null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -40,9 +41,9 @@ const Dashboard = () => {
 
 return(
   <div className="bg-gray-100 min-h-screen text-gray-900">
-    <DashNavTop/>
+    <DashNavTop setSearchQuery={setSearchQuery}/>
     <FilterButton/>
-    <ContentList/>
+    <ContentList searchQuery={searchQuery}/>
   </div>
 )
 }

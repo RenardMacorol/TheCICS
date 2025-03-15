@@ -11,8 +11,11 @@ type Notification = {
     timestamp: string;
     read: boolean;
 }
+interface Search {
+    setSearchQuery: (query: string) => void;
+}
 
-const DashNavTop = () => {
+const DashNavTop = ({setSearchQuery}:Search) => {
     const navigate = useNavigate();
     const [isSideBarOpen, setSideBarOpen] = useState(false);
     const [isProfileOpen, setProfileOpen] = useState(false);
@@ -44,6 +47,7 @@ const DashNavTop = () => {
         
         fetchUserData();
     }, []);
+
     
     const handleLogout = async () => {
         await Logout();
@@ -90,6 +94,7 @@ const DashNavTop = () => {
                 <input 
                     type="text" 
                     placeholder="Search theses..." 
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="ml-2 outline-none bg-transparent text-white placeholder-violet-300 w-full"
                 />
             </div>

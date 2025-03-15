@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../api/supabase";
-import { BookOpen, Github, Star, StarOff, Eye, ThumbsUp, MessageSquare, Share2, Pencil } from "lucide-react"; //temporarilly removed Download and View
+import { BookOpen, Github, Star, StarOff, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
 
 type Thesis = {
     thesisID: string;
@@ -17,8 +17,14 @@ type Thesis = {
     comments?: number;
 }
 
-const ContentList = () => {
+interface Search{
+    searchQuery: string;
+
+}
+
+const ContentList = ({searchQuery} : Search) => {
     const [items, setItems] = useState<Thesis[]>([]);
+    const [filteredThesis, setFilteredThesis] = useState<Thesis[]>([]);
     const [bookmarks, setBookmarks] = useState<string[]>([]);
     const [expandedAbstracts, setExpandedAbstracts] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(true);
@@ -49,7 +55,8 @@ const ContentList = () => {
             }));
             
             console.log("Fetched theses: ", enhancedData);
-            setItems(enhancedData);
+            setItems(enhancedData)
+            setFilteredThesis(enhancedData);
             setLoading(false);
         };
 
@@ -71,6 +78,18 @@ const ContentList = () => {
         fetchTheses();
         fetchBookmarks();
     }, []); 
+    // Filter the theses when searchQuery changes
+  useEffect(() => {
+    if (!searchQuery) {
+      setFilteredThesis(items); // Show all if search is empty
+    } else {
+      setFilteredThesis(
+        items.filter((thesis) =>
+          thesis.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+    }
+  }, [searchQuery, items]);
     
     const toggleAbstract = (thesisID: string) => {
         setExpandedAbstracts(prev => ({
@@ -117,7 +136,7 @@ const ContentList = () => {
 
     return(
         <div className="px-6 space-y-6 pb-12">
-            {items.map((item) => (
+            {filteredThesis.map((item) => (
                 <div 
                     key={item.thesisID} 
                     className="flex flex-col bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border-l-4 border-violet-500"
