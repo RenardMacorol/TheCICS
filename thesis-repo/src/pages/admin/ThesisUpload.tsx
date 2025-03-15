@@ -1,5 +1,11 @@
-import { useState } from "react";
-import { supabase } from "../../api/supabase";
+import { useEffect, useState } from "react";
+import { supabase } from '../../api/supabase';
+
+interface Authors{
+  authorID: number,
+  firstName: string,
+  lastName: string,
+}
 
 const ThesisUpload = () => {
 //Nakaw ko lang tong code nato from ayato
@@ -13,7 +19,36 @@ const ThesisUpload = () => {
   const [abstract, setAbstract] = useState("")
   const [publicationYear, setPublicationYear] = useState("")
   const [keywords, setKeywords] = useState("")
-  const [authorID, setAuthorID] = useState("")
+  //For Author Field
+  const [authors, setAuthors] = useState<Authors[]>([])
+  const [selectedAuthor, setSelectedAuthor] = useState<string>("")
+  const [newAuthor, setNewAuthor] = useState<{firstName:string;lastName:string} | null>(null)
+
+  useEffect(() => {
+    const fetchAuthors = async () => {
+      const {data, error }  = await supabase.from("Author").select("*")
+      if(error){
+        console.error("Error Fetching" , error)
+      }else{
+
+      console.log(data);
+      setAuthors(data);
+      }
+    }
+
+    fetchAuthors();
+
+  }, [])
+
+  const handleAuthorChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedAuthor(value)
+    if (value === "new"){
+      setNewAuthor({firstName:"",lastName:""})
+    }else {
+      setNewAuthor(null)
+    }
+  }
 
   // Handle file selection and drag-drop
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,6 +78,26 @@ const ThesisUpload = () => {
     setUploading(true);
     setProgress(0);
     setMessage("");
+
+    let finalAuthorID: number | null;
+
+   // Insert new author if needed
+   if (newAuthor) {
+    const { data, error } = await supabase
+      .from("Author")
+      .insert([{ firstName: newAuthor.firstName, lastName: newAuthor.lastName }])
+      .select("authorID")
+      .single()
+
+    if (error) {
+      setMessage(`❌ Error adding new author: ${error.message}`);
+      setUploading(false);
+      return;
+    }
+    finalAuthorID = data?.authorID;
+  } else {
+      finalAuthorID = parseInt(selectedAuthor);
+  } 
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -74,7 +129,7 @@ const ThesisUpload = () => {
       const { error: insertError } = await supabase.from("Thesis").insert([
         {
           thesisID: randomThesisID,
-          authorID: parseInt(authorID),
+          authorID: finalAuthorID,
           title,
           abstract,
           publicationYear,
@@ -98,7 +153,6 @@ const ThesisUpload = () => {
     setAbstract("");
     setPublicationYear("");
     setKeywords("");
-    setAuthorID("");
     setMessage("✅ File uploaded successfully!");
   };
 
@@ -109,6 +163,37 @@ const ThesisUpload = () => {
         {/* Header */}
         <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">UPLOAD Thesis File</h2>
 
+         {/* Author Selection */}
+         <label className="block mb-2">Select Author:</label>
+        <select onChange={handleAuthorChange} value={selectedAuthor} className="w-full p-2 border rounded">
+          <option value="" disabled>Select an Author</option>
+          {authors.map((author) => (
+            <option key={author.authorID} value={`${author.firstName} ${author.lastName}`}>
+              {author.firstName} {author.lastName}
+            </option>
+          ))}
+          <option value="new">Add New Author</option>
+        </select>
+
+        {/* New Author Form */}
+        {newAuthor && (
+          <div className="mt-2">
+            <input
+              type="text"
+              placeholder="First Name"
+              value={newAuthor.firstName}
+              onChange={(e) => setNewAuthor((prev) => ({ ...prev!, firstName: e.target.value }))}
+              className="w-full p-2 border rounded mb-2"
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={newAuthor.lastName}
+              onChange={(e) => setNewAuthor((prev) => ({ ...prev!, lastName: e.target.value }))}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+        )}
         {/*Form Inputs*/}
         <div className="mb-4">
           <input type="text"
@@ -137,14 +222,6 @@ const ThesisUpload = () => {
             onChange={(e) => setKeywords(e.target.value)}
             required 
             />
-          <input
-            type="number"
-            placeholder="Author ID"
-            className="w-full p-2 border rounded mb-2"
-            value={authorID}
-            onChange={(e) => setAuthorID(e.target.value)}
-            required
-          />
         </div>
 
         {/* Drag & Drop Area */}
