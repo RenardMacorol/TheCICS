@@ -8,6 +8,13 @@ const ThesisUpload = () => {
   const [progress, setProgress] = useState<number | null>(null);
   const [message, setMessage] = useState("");
 
+  //Form Field
+  const [title, setTitle] = useState("")
+  const [abstract, setAbstract] = useState("")
+  const [publicationYear, setPublicationYear] = useState("")
+  const [keywords, setKeywords] = useState("")
+  const [authorID, setAuthorID] = useState("")
+
   // Handle file selection and drag-drop
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -67,11 +74,11 @@ const ThesisUpload = () => {
       const { error: insertError } = await supabase.from("Thesis").insert([
         {
           thesisID: randomThesisID,
-          authorID: 3,
-          title: "Eme For Now",
-          abstract: "Eme Eme lang upload",
-          publicationYear: "2024",
-          keywords: "ML, Mobile, Legends",
+          authorID: parseInt(authorID),
+          title,
+          abstract,
+          publicationYear,
+          keywords,
           pdfFileUrl: fileData.publicUrl,
           status: "Active"
         },
@@ -87,6 +94,11 @@ const ThesisUpload = () => {
 
     setUploading(false);
     setFiles([]); // Clear file list
+    setTitle("");
+    setAbstract("");
+    setPublicationYear("");
+    setKeywords("");
+    setAuthorID("");
     setMessage("✅ File uploaded successfully!");
   };
 
@@ -96,6 +108,44 @@ const ThesisUpload = () => {
       <div className="w-full max-w-2xl bg-gray-200 shadow-xl rounded-lg p-6 border border-gray-400">
         {/* Header */}
         <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">UPLOAD Thesis File</h2>
+
+        {/*Form Inputs*/}
+        <div className="mb-4">
+          <input type="text"
+          placeholder="Thesis Title"
+          className="w-full p-2 border rounded mb-2"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)} 
+          required /> 
+          <textarea           
+          placeholder="Abstract"
+          className="w-full p-2 border rounded mb-2"
+          value={abstract}
+          onChange={(e) => setAbstract(e.target.value)}
+          required /> 
+          <input type="text"
+          placeholder="Publication Year"
+          className="w-full p-2 border rounded mb-2"
+          value={publicationYear}
+          onChange={(e) => setPublicationYear(e.target.value)} 
+          required /> 
+           <input
+            type="text"
+            placeholder="Keywords (comma-separated)"
+            className="w-full p-2 border rounded mb-2"
+            value={keywords}
+            onChange={(e) => setKeywords(e.target.value)}
+            required 
+            />
+          <input
+            type="number"
+            placeholder="Author ID"
+            className="w-full p-2 border rounded mb-2"
+            value={authorID}
+            onChange={(e) => setAuthorID(e.target.value)}
+            required
+          />
+        </div>
 
         {/* Drag & Drop Area */}
         <label
