@@ -40,7 +40,7 @@ const Dashboard = () => {
   }, [navigate]);
 
 return(
-  <div className="bg-gray-100 min-h-screen text-gray-900">
+  <div className="bg-gray-100 min-h-screen text-white">
     <DashNavTop setSearchQuery={setSearchQuery}/>
     <FilterButton/>
     <ContentList searchQuery={searchQuery}/>
