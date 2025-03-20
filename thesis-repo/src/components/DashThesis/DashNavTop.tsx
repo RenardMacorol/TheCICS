@@ -23,15 +23,27 @@ const DashNavTop = ({setSearchQuery}:Search) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [userName, setUserName] = useState("");
+    const [userRole, setUserRole] = useState<string | null>(null);
     
     useEffect(() => {
         const fetchUserData = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
                 setUserName(user.user_metadata?.full_name || "User");
+
+                //Fetch User Role from Supabase
+                const { data: roleData, error: roleError } = await supabase 
+                    .from("Users")
+                    .select("role")
+                    .eq("userID", user.id)
+                    .single();
+
+                if (!roleError && roleData) {
+                    setUserRole(roleData.role); // 
+                }
                 
                 // Fetch notifications
-                const { data, error } = await supabase
+                const { data, error } = await supabase 
                     .from("UserNotifications")
                     .select("*")
                     .eq('userID', user.id)
@@ -39,8 +51,8 @@ const DashNavTop = ({setSearchQuery}:Search) => {
                     .limit(5);
                 
                 if (!error && data) {
-                    setNotifications(data);
-                    setUnreadCount(data.filter(n => !n.read).length);
+                    setNotifications(data); 
+                    setUnreadCount(data.filter(n => !n.read).length); 
                 }
             }
         };
@@ -200,14 +212,17 @@ const DashNavTop = ({setSearchQuery}:Search) => {
                                         <CircleHelp className="mr-2 w-4 h-4"/> Help & Support
                                     </button>
                                 </li>
-                                <li className="border-b">
-                                    <button 
-                                        className="p-3 w-full text-left hover:bg-gray-50 flex items-center"
-                                        onClick={() => navigate('/admin')}
-                                    >
-                                        <span className="mr-2">🛠️</span> Admin Panel
-                                    </button>
-                                </li>
+                                {/* ✅ Conditionally Render Admin Panel */}
+                                {userRole === "Admin" && (
+                                    <li className="border-b">
+                                        <button 
+                                            className="p-3 w-full text-left hover:bg-gray-50 flex items-center"
+                                            onClick={() => navigate('/admin')}
+                                        >
+                                            <span className="mr-2">🛠️</span> Admin Panel
+                                        </button>
+                                    </li>
+                                )}
                                 <li>
                                     <button 
                                         className="p-3 w-full text-left hover:bg-red-50 flex items-center text-red-600"
