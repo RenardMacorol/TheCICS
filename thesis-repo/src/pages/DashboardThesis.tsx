@@ -14,27 +14,27 @@ const Dashboard = () => {
     const fetchUser = async () => {
       const { data: { user }, error } = await supabase.auth.getUser();
 
-      if (error||!user || !user.email?.endsWith("@neu.edu.ph")) {
-        navigate("/"); // ✅ Redirect to login if not logged in
-      }else{
+      if (error || !user || !user.email?.endsWith("@neu.edu.ph")) {
+        navigate("/", { state: { errorMessage: "PLEASE LOGIN USING YOUR INSTITUTIONAL EMAIL." } });
+        return;
+      }
+
       const fullname = user.user_metadata?.full_name || "User";
-      const {error } = await supabase.from("Users").insert({
-          userID: user.id,
-          name: fullname,
-          email: user.email,
-          role: "Student",
-          googleAuthID: user.id,
-          profilePicture: user.user_metadata?.avatar_url,
-          dateRegistered: new Date().toISOString()
-        })
-        if(error) console.error("Error here", error)
-        console.log("The User Creation was success")
+
+      const { error: insertError } = await supabase.from("Users").insert({
+        userID: user.id,
+        name: fullname,
+        email: user.email,
+        role: "Student",
+        googleAuthID: user.id,
+        profilePicture: user.user_metadata?.avatar_url,
+        dateRegistered: new Date().toISOString()
+      });
+
+      if (insertError) console.error("Error inserting user:", insertError);
 
       setUser(user);
- 
-      }
-      
-   };
+    };
 
     fetchUser();
   }, [navigate]);
