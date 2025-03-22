@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import SignInButton from "../components/SignInButton";
+import { supabase } from "../api/supabase";
 
 const SignInPage = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [animationStep, setAnimationStep] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -14,6 +16,20 @@ const SignInPage = () => {
     }, 3000);
     
     return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+
+      if (data?.user) {
+        if (!data.user.email?.endsWith("@neu.edu.ph")) {
+          await supabase.auth.signOut();
+          setErrorMessage("PLEASE LOGIN USING YOUR INSTITUTIONAL EMAIL. ");
+        }
+      }
+    };
+    checkUser();
   }, []);
 
   return (
@@ -34,6 +50,13 @@ const SignInPage = () => {
           <div className="transform hover:scale-105 transition-transform duration-300 mb-8">
             <SignInButton />
           </div>
+
+          {/* ✅ Display error message if present */}
+          {errorMessage && (
+            <div className="mt-4 p-3 bg-red-500 text-white rounded-lg shadow-lg">
+              ⚠️ {errorMessage}
+            </div>
+          )}
           
           <div className="mt-8 text-violet-200 text-sm">
             <p>🔐 Secure access to your collaborative workspace.</p>
