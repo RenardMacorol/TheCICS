@@ -82,6 +82,15 @@ const DashNavTop = ({setSearchQuery}:Search) => {
             setUnreadCount(0);
         }
     };
+
+    const navigateToHome = () => {
+        navigate('/');
+    };
+
+    const navigateToBookmarked = () => {
+        navigate('/bookmarked');
+        setSideBarOpen(false);
+    };
     
     return(
         <nav className="bg-violet-800 text-white px-6 py-3 flex justify-between items-center shadow-md">
@@ -92,7 +101,7 @@ const DashNavTop = ({setSearchQuery}:Search) => {
                 >
                     ☰
                 </button>
-                <div className="ml-4 w-auto h-10">
+                <div className="ml-4 w-auto h-10 cursor-pointer" onClick={navigateToHome}>
                 <img
                     src="/TheCICSLogo.png"
                     alt="TheCICS Logo"
@@ -112,12 +121,6 @@ const DashNavTop = ({setSearchQuery}:Search) => {
             </div>
             
             <div className="flex gap-4 items-center">
-                {/* Removed */}
-                {/* <button className="bg-aqua-400 hover:bg-aqua-500 text-violet-900 font-medium py-1.5 px-3 rounded-full flex items-center gap-1 transition-colors">
-                    <Plus className="w-4 h-4"/>
-                    <span>Add Thesis</span>
-                </button> */}
-                
                 <div className="relative">
                     <button 
                         onClick={() => {
@@ -268,13 +271,18 @@ const DashNavTop = ({setSearchQuery}:Search) => {
                     
                     <ul className="space-y-1">
                         <li>
-                            <button className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800">
+                            <button 
+                                className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800"
+                            >
                                 <BookMarked className="w-5 h-5 mr-3 text-aqua-400" />
                                 <span>My Theses</span>
                             </button>
                         </li>
                         <li>
-                            <button className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800">
+                            <button 
+                                className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800"
+                                onClick={navigateToBookmarked}
+                            >
                                 <Bookmark className="w-5 h-5 mr-3 text-aqua-400" />
                                 <span>Bookmarked Theses</span>
                             </button>
