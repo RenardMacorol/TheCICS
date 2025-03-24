@@ -7,6 +7,7 @@ import LandingPage from './pages/LandingPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import BookmarkedTheses from './pages/BookmarkedTheses';
 
 
 const App = () => {
@@ -45,6 +46,7 @@ const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
         <Route path='/SignInPage' element={<SignInPage/>}/>
         <Route path='/SignUpPage' element={<SignUpPage/>}/>
         <Route path='/admin' element={<AdminDashboard/>}/>
+        <Route path="/bookmarked" element={<BookmarkedTheses />} />
       </Routes>
     </Router>
   );
