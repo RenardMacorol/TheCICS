@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom"; 
 import SignInButton from "../components/SignInButton";
 import { supabase } from "../api/supabase";
 
@@ -6,6 +7,7 @@ const SignInPage = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [animationStep, setAnimationStep] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const location = useLocation(); 
 
   useEffect(() => {
     setIsLoaded(true);
@@ -31,6 +33,14 @@ const SignInPage = () => {
     };
     checkUser();
   }, []);
+
+   // Check if URL contains `?error=1`, which means a non-institutional user was redirected
+   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("error") === "1") {
+      setErrorMessage("PLEASE LOGIN USING YOUR INSTITUTIONAL EMAIL.");
+    }
+  }, [location]);
 
   return (
     <div className="flex h-screen bg-white text-gray-100 overflow-hidden">
