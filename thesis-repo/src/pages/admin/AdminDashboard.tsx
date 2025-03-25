@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../api/supabase";
 import { User } from "lucide-react";
+import ThesisUpload from './ThesisUpload';
 
 interface User {
   userID: string;
@@ -271,6 +272,7 @@ const handleDeleteThesis = async (thesisID: number) => {
           </tbody>
         </table>
       )}
+      <ThesisUpload/>
     </div>
   );
 };
