@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import './App.css'
+import './App.css';
 import { supabase } from './api/supabase';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from './pages/DashboardThesis';
@@ -9,47 +9,65 @@ import SignUpPage from './pages/SignUpPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import BookmarkedTheses from './pages/BookmarkedTheses';
 
-
 const App = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => { 
+  useEffect(() => {
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
-      if (data?.user && data.user.email?.endsWith("@neu.edu.ph")) {
+      if (data?.user) {
         setUser(data.user);
       } else {
-        setUser(null)
+        setUser(null);
       }
+      setLoading(false); 
     };
-// Listen for authentication state changes
-const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
-  if (session?.user && session.user.email?.endsWith("@neu.edu.ph")) {
-    setUser(session.user);
-  } else {
-    setUser(null);
-  }
-});
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
+      if (session?.user) {
+        setUser(session.user);
+      } else {
+        setUser(null);
+      }
+    });
+
     fetchUser();
 
-  return () => {
-    authListener.subscription.unsubscribe();
-  }
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Prevents redirection before user state is set
+  }
 
   return (
     <Router>
       <Routes>
+        {/* Redirect Institutional Users to Dashboard */}
         <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LandingPage />} />
-        <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
-        <Route path='/SignInPage' element={<SignInPage/>}/>
-        <Route path='/SignUpPage' element={<SignUpPage/>}/>
-        <Route path='/admin' element={<AdminDashboard/>}/>
+
+        {/* Dashboard: Only for Institutional Users */}
+        <Route 
+          path="/dashboard" 
+          element={
+            user ? (
+              user.email.endsWith("@neu.edu.ph") 
+                ? <Dashboard /> 
+                : <Navigate to="/SignInPage?error=1" replace />
+            ) : <Navigate to="/" />
+          } 
+        />
+
+        <Route path='/SignInPage' element={<SignInPage />} />
+        <Route path='/SignUpPage' element={<SignUpPage />} />
+        <Route path='/admin' element={<AdminDashboard />} />
         <Route path="/bookmarked" element={<BookmarkedTheses />} />
       </Routes>
     </Router>
   );
 };
 
-export default App
+export default App;
