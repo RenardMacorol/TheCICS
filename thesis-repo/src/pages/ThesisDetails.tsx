@@ -1,0 +1,237 @@
+  import { useEffect, useState } from "react";
+  import { useParams } from "react-router-dom";
+  import { supabase } from "../api/supabase";
+  import DashNavTop from '../components/DashThesis/DashNavTop';
+  import FilterButton from "../components/DashThesis/FilterButton";
+
+  type Author = {
+    firstName: string;
+    lastName: string;
+  };
+
+  type Thesis = {
+    thesisID: string;
+    authorID: number | null;
+    title: string;
+    abstract: string;
+    publicationYear: number;
+    keywords: string;
+    pdfFileUrl: string;
+    status: string;
+    author?: Author | Author[];
+    authorName?: string;
+    views: number;
+    likes: number;
+  };
+
+  type Comment = {
+    commentID: number;
+    thesisID: string;
+    userName: string;
+    content: string;
+    createdAt: string;
+  };
+
+  const ThesisDetails = () => {
+    const { thesisID } = useParams();
+    const [thesis, setThesis] = useState<Thesis | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [newComment, setNewComment] = useState("");
+    const [likes, setLikes] = useState(0);
+
+    useEffect(() => {
+      const fetchThesisDetails = async () => {
+        const { data, error } = await supabase
+          .from("Thesis")
+          .select(`
+            thesisID, title, abstract, publicationYear, keywords, pdfFileUrl, status, authorID, views, likes,
+            Author:authorID (firstName, lastName)
+          `)
+          .eq("thesisID", thesisID)
+          .single();
+
+        if (error) {
+          console.error("Error fetching thesis details:", error);
+        } else {
+          const author = data.Author && Array.isArray(data.Author) ? data.Author[0] : data.Author;
+
+          setThesis({
+            ...data,
+            authorName: author ? `${author.firstName} ${author.lastName}` : "Unknown Author",
+          });
+
+          setLikes(data.likes);
+        }
+
+        setLoading(false);
+      };
+
+      const fetchComments = async () => {
+        const { data, error } = await supabase
+          .from("comments")
+          .select("commentID, thesisID, userName, content, createdAt")
+          .eq("thesisID", thesisID)
+          .order("createdAt", { ascending: false });
+
+
+        if (error) {
+          console.error("Error fetching comments:", error);
+        } else {
+          console.log("Fetched comments:", data);
+          setComments(data);
+        }
+      };
+
+      const incrementViews = async () => {
+        await supabase
+          .from("Thesis")
+          .update({ views: supabase.rpc("increment_view_count", { thesis_id: thesisID }) })
+          .eq("thesisID", thesisID);
+      };
+      
+
+      if (thesisID) {
+        fetchThesisDetails();
+        fetchComments();
+        incrementViews();
+      }
+    }, [thesisID]);
+
+    const handleLike = async () => {
+      const updatedLikes = likes + 1;
+      setLikes(updatedLikes);
+
+      await supabase
+        .from("Thesis")
+        .update({ likes: updatedLikes })
+        .eq("thesisID", thesisID);
+    };
+
+    const handleCommentSubmit = async () => {
+      if (!newComment.trim()) return;
+    
+      // Get the authenticated user's information
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.error("User is not authenticated");
+        return;
+      }
+    
+      const { data, error } = await supabase
+        .from("comments")
+        .insert([
+          {
+            thesisID,
+            username: user.email, // Use user's email instead of "Anonymous"
+            content: newComment,
+            userid: user.id,
+            createdAt: new Date().toISOString(), // Store user ID for reference
+          }
+        ])
+        .select();
+    
+      if (error) {
+        console.error("Error adding comment:", error.message || error);
+      } else {
+        
+        setComments([data[0], ...comments]);
+        setNewComment("");
+      }
+    };
+    
+
+    if (loading) return <div className="text-center p-10">Loading thesis details...</div>;
+
+    if (!thesis) return <div className="text-center p-10">Thesis not found.</div>;
+
+    return (
+      <div className="bg-gray-100 min-h-screen text-white">
+        <DashNavTop setSearchQuery={() => {}} />
+        <FilterButton />
+
+        <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-5 text-black">
+          <h1 className="text-2xl font-bold mb-4">{thesis.title}</h1>
+          <p className="text-gray-600">By: {thesis.authorName}</p>
+          <p className="text-gray-500 text-sm">Published: {thesis.publicationYear}</p>
+          <p className="text-gray-500 text-sm">Views: {thesis.views} | Likes: {likes}</p>
+
+          <div className="mt-4">
+            <h2 className="text-lg font-semibold">Abstract</h2>
+            <p className="text-gray-700">{thesis.abstract}</p>
+          </div>
+
+          <div className="mt-4">
+            <h2 className="text-lg font-semibold">Keywords</h2>
+            <p className="text-gray-700">{thesis.keywords}</p>
+          </div>
+
+          <div className="mt-4">
+            <a
+              href={thesis.pdfFileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+            >
+              View PDF
+            </a>
+          </div>
+
+          <button
+            onClick={handleLike}
+            className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+          >
+            Like ❤️ ({likes})
+          </button>
+
+          <div className="mt-6">
+            <h2 className="text-lg font-semibold">Comments</h2>
+            <div className="mt-2">
+              {comments.length === 0 ? (
+                <p className="text-gray-500">No comments yet.</p>
+              ) : (
+                comments.map((comment) => (
+                  <div key={comment.commentID} className="bg-gray-200 p-2 rounded-md my-2">
+                    <p className="text-sm font-semibold">{comment.userName}</p>
+                    <p className="text-gray-700">{comment.content}</p>
+                    <p className="text-gray-500 text-xs">
+                      {comment.createdAt && !isNaN(new Date(comment.createdAt).getTime()) 
+                        ? new Date(comment.createdAt).toLocaleString("en-US", {
+                            timeZone: "Asia/Manila",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: true,
+                          })
+                        : "No Date Available"}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="mt-4">
+              <textarea
+                className="w-full p-2 border rounded-lg"
+                placeholder="Add a comment..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+              ></textarea>
+              <button
+                onClick={handleCommentSubmit}
+                className="mt-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+              >
+                Submit Comment
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  export default ThesisDetails;
