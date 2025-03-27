@@ -66,7 +66,7 @@ const App = () => {
         <Route path='/SignUpPage' element={<SignUpPage />} />
         <Route path='/admin' element={<AdminDashboard />} />
         <Route path="/bookmarked" element={<BookmarkedTheses />} />
-        <Route path="/ThesisUpload/:thesisID" element={<ThesisDetails />} />
+        <Route path="/thesis/:thesisID" element={<ThesisDetails />} />
       </Routes>
     </Router>
   );
