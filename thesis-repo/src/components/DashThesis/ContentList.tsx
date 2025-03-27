@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../../api/supabase";
 import { BookOpen, Github, Star, StarOff, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
+import CitationModal from "./CitationModal";
 
 type Thesis = {
     thesisID: string;
@@ -19,7 +21,6 @@ type Thesis = {
 
 interface Search{
     searchQuery: string;
-
 }
 
 const ContentList = ({searchQuery} : Search) => {
@@ -28,6 +29,9 @@ const ContentList = ({searchQuery} : Search) => {
     const [bookmarks, setBookmarks] = useState<string[]>([]);
     const [expandedAbstracts, setExpandedAbstracts] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(true);
+    const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
+    const [isCitationModalOpen, setIsCitationModalOpen] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
        const fetchTheses = async () => {
@@ -98,6 +102,11 @@ const ContentList = ({searchQuery} : Search) => {
         }));
     };
 
+    const handleThesisClick = (thesisID: string) => {
+        navigate(`/thesis/${thesisID}`); // ✅ Navigate to the thesis details page
+      };
+      
+
     const toggleBookmark = async (thesisID: string) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
@@ -120,6 +129,11 @@ const ContentList = ({searchQuery} : Search) => {
             
             setBookmarks([...bookmarks, thesisID]);
         }
+    };
+
+    const handleShareClick = (thesis: Thesis) => {
+        setSelectedThesis(thesis);
+        setIsCitationModalOpen(true);
     };
 
     if (loading) {
@@ -150,7 +164,7 @@ const ContentList = ({searchQuery} : Search) => {
                         {/* Main Content */}
                         <div className="flex-1 px-4">
                             <div className="flex justify-between">
-                                <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1">{item.title}</h3>
+                                <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1 cursor-pointer hover:text-violet-500" onClick={() => handleThesisClick(item.thesisID)}>{item.title}</h3>
                                 <button 
                                     onClick={() => toggleBookmark(item.thesisID)}
                                     className="focus:outline-none transition-transform hover:scale-110"
@@ -220,7 +234,10 @@ const ContentList = ({searchQuery} : Search) => {
                                 <MessageSquare size={16} />
                                 <span>Comment</span>
                             </button>
-                            <button className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm">
+                            <button 
+                                onClick={() => handleShareClick(item)}
+                                className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm"
+                            >
                                 <Share2 size={16} />
                                 <span>Share</span>
                             </button>
@@ -231,7 +248,7 @@ const ContentList = ({searchQuery} : Search) => {
                                 <Github size={16} />
                                 <span>Code</span>
                             </button>
-                            <button onClick={() => window.open(item.pdfFileUrl, "_blank")}className="flex items-center gap-1 bg-aqua-100 text-aqua-700 rounded-full px-3 py-1 text-sm hover:bg-aqua-200 transition-colors">
+                            <button onClick={() => window.open(item.pdfFileUrl, "_blank")}className="flex items-center gap-1 bg-aqua-100 text-violet-700 rounded-full px-3 py-1 text-sm hover:bg-aqua-200 transition-colors">
                                 <Pencil size={16} />
                                 <span>View</span>
                             </button>
@@ -248,6 +265,13 @@ const ContentList = ({searchQuery} : Search) => {
                     <p className="text-gray-500 dark:text-gray-400 mt-1">Try adjusting your filters or check back later</p>
                 </div>
             )}
+
+            {/* Citation Modal */}
+            <CitationModal 
+                thesis={selectedThesis}
+                isOpen={isCitationModalOpen}
+                onClose={() => setIsCitationModalOpen(false)}
+            />
         </div>
     );
 };
