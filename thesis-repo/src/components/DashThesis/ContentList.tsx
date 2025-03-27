@@ -103,7 +103,7 @@ const ContentList = ({searchQuery} : Search) => {
     };
 
     const handleThesisClick = (thesisID: string) => {
-        navigate(`/thesis/${thesisID}`); // ✅ Navigate to the thesis details page
+        navigate(`/thesis/${thesisID}`); // Navigate to the thesis details page
       };
       
 
