@@ -1,7 +1,7 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "../../api/supabase";
 import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil } from 'lucide-react';
-
 
 type Thesis = {
     thesisID: string;
@@ -26,6 +26,8 @@ const BookmarkList = ({ searchQuery }: Search) => {
     const [bookmarkedTheses, setBookmarkedTheses] = useState<Thesis[]>([]);
     const [expandedAbstracts, setExpandedAbstracts] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(true);
+    // Add a refreshTrigger state to force refetching of bookmarks
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     useEffect(() => {
         const fetchBookmarkedTheses = async () => {
@@ -86,7 +88,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
         };
 
         fetchBookmarkedTheses();
-    }, []); 
+    }, [refreshTrigger]); // Add refreshTrigger to dependency array
     
     // Filter bookmarked theses based on search query
     const filteredTheses = searchQuery
@@ -104,24 +106,38 @@ const BookmarkList = ({ searchQuery }: Search) => {
     const toggleBookmark = async (thesisID: string) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
-        
-        try {
-            // Remove bookmark from database
-            const { error } = await supabase
-                .from("UserBookmarks")
-                .delete()
-                .match({ userID: user.id, thesisID });
-                
-            if (error) throw error;
-            
-            // Update local state to remove the thesis
-            setBookmarkedTheses(prev => prev.filter(thesis => thesis.thesisID !== thesisID));
-           
-        } catch (error) {
+      
+        // Use the filter method to find the thesis in the bookmarked list
+        const isBookmarked = bookmarkedTheses.some(b => b.thesisID === thesisID);
+      
+        if (isBookmarked) {
+          // Remove bookmark
+          const { error } = await supabase
+            .from("UserBookmarks")
+            .delete()
+            .match({ userID: user.id, thesisID });
+      
+          if (!error) {
+            // Instead of just updating the state, trigger a refresh to get the latest data
+            setRefreshTrigger(prev => prev + 1);
+          } else {
             console.error("Error removing bookmark:", error);
-           
+          }
+        } else {
+          // Add bookmark
+          const { error } = await supabase
+            .from("UserBookmarks")
+            .insert([{ userID: user.id, thesisID }]);
+      
+          if (!error) {
+            // Instead of just updating the state, trigger a refresh to get the latest data
+            setRefreshTrigger(prev => prev + 1);
+          } else {
+            console.error("Error adding bookmark:", error);
+          }
         }
-    };
+    };      
+    
 
     if (loading) {
         return (
@@ -153,12 +169,19 @@ const BookmarkList = ({ searchQuery }: Search) => {
                             <div className="flex-1 px-4">
                                 <div className="flex justify-between">
                                     <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1">{item.title}</h3>
-                                    <button 
+                                    <button
                                         onClick={() => toggleBookmark(item.thesisID)}
                                         className="focus:outline-none transition-transform hover:scale-110"
                                         aria-label="Remove bookmark"
                                     >
                                         <Star className="w-5 h-5 text-aqua-400 fill-aqua-400" />
+                                    </button>
+                                    <button
+                                        onClick={() => alert(`Clicked on ${item.title}`)}
+                                        className="ml-2 bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-sm hover:bg-blue-200 transition-colors"
+                                        aria-label="Click action"
+                                    >
+                                        <span>Click</span>
                                     </button>
                                 </div>
                                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
