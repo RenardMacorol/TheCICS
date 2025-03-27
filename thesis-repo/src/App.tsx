@@ -8,6 +8,7 @@ import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import BookmarkedTheses from './pages/BookmarkedTheses';
+import ThesisDetails from './pages/ThesisDetails';
 
 const App = () => {
   const [user, setUser] = useState<any>(null);
@@ -21,7 +22,7 @@ const App = () => {
       } else {
         setUser(null);
       }
-      setLoading(false); 
+      setLoading(false); // Stop loading once user state is determined
     };
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
@@ -60,11 +61,12 @@ const App = () => {
             ) : <Navigate to="/" />
           } 
         />
-
+        
         <Route path='/SignInPage' element={<SignInPage />} />
         <Route path='/SignUpPage' element={<SignUpPage />} />
         <Route path='/admin' element={<AdminDashboard />} />
         <Route path="/bookmarked" element={<BookmarkedTheses />} />
+        <Route path="/ThesisUpload/:thesisID" element={<ThesisDetails />} />
       </Routes>
     </Router>
   );
