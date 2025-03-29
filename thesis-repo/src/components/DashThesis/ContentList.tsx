@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../api/supabase";
 
-import { BookOpen, Github, Star, StarOff, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
+import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
 import CitationModal from "./CitationModal";
 
 type Thesis = {
