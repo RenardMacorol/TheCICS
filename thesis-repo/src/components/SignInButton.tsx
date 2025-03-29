@@ -1,14 +1,10 @@
-import { supabase } from '../api/supabase';
 import { useEffect, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import Login from '../service/Login';
-import { User } from '@supabase/supabase-js';
 
 const SignIn = () => {
-    const navigate = useNavigate();
     const location = useLocation();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [,setUser] = useState<User>();
     const [errorMessage, setErrorMessage] = useState<string | null>(null); // State to store error messages
          
     useEffect(() => {
