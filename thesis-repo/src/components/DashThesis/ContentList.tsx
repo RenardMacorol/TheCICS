@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../../api/supabase";
-import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
+
+import { BookOpen, Github, Star, StarOff, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
 import CitationModal from "./CitationModal";
 
 type Thesis = {
@@ -32,6 +34,7 @@ const ContentList = ({searchQuery} : Search) => {
     const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
     const [isCitationModalOpen, setIsCitationModalOpen] = useState(false);
 
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchTheses = async () => {
             setLoading(true);
@@ -106,6 +109,11 @@ const ContentList = ({searchQuery} : Search) => {
         }));
     };
 
+    const handleThesisClick = (thesisID: string) => {
+        navigate(`/thesis/${thesisID}`); // Navigate to the thesis details page
+      };
+      
+
     const toggleBookmark = async (thesisID: string) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
@@ -163,7 +171,7 @@ const ContentList = ({searchQuery} : Search) => {
                         {/* Main Content */}
                         <div className="flex-1 px-4">
                             <div className="flex justify-between">
-                                <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1">{item.title}</h3>
+                                <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1 cursor-pointer hover:text-violet-500" onClick={() => handleThesisClick(item.thesisID)}>{item.title}</h3>
                                 <button 
                                     onClick={() => toggleBookmark(item.thesisID)}
                                     className="focus:outline-none transition-transform hover:scale-110"
