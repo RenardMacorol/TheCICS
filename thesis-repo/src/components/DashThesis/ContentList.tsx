@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../api/supabase";
-import { BookOpen, Github, Star, StarOff, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
+import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
+import CitationModal from "./CitationModal";
 
+type Thesis = {
     thesisID: string;
     authorID: number;
     title: string;
@@ -15,6 +17,7 @@ import { BookOpen, Github, Star, StarOff, Eye, ThumbsUp, MessageSquare, Share2, 
     likes?: number;
     comments?: number;
 }
+
 
 interface Search{
     searchQuery: string;

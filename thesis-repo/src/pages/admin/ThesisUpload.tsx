@@ -158,9 +158,9 @@ const ThesisUpload = () => {
   return (
     <div className="p-6 max-h-[80vh] overflow-y-auto">
       {/* Header */}
-      <div className="bg-black p-5 -m-6 mb-6 text-center">
-        <h3 className="text-xl font-medium text-white">Upload New Thesis</h3>
-        <p className="text-white text-sm mt-1">Complete all fields and upload your thesis document</p>
+      <div className="bg-[#5CE1E6] p-5 -m-6 mb-6 text-center">
+        <h3 className="text-xl font-medium text-black">Upload New Thesis</h3>
+        <p className="text-black text-sm mt-1">Complete all fields and upload your thesis document</p>
       </div>
 
       {/* Author Selection */}
