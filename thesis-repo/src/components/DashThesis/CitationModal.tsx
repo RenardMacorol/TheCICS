@@ -186,3 +186,5 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
 };
 
 export default CitationModal;
+
+

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../api/supabase";
+
 import { BookOpen, Github, Star, StarOff, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
 import CitationModal from "./CitationModal";
 
@@ -19,6 +20,7 @@ type Thesis = {
     comments?: number;
 }
 
+
 interface Search{
     searchQuery: string;
 }
@@ -31,57 +33,62 @@ const ContentList = ({searchQuery} : Search) => {
     const [loading, setLoading] = useState(true);
     const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
     const [isCitationModalOpen, setIsCitationModalOpen] = useState(false);
-    const navigate = useNavigate();
 
+    const navigate = useNavigate();
     useEffect(() => {
-       const fetchTheses = async () => {
+        const fetchTheses = async () => {
             setLoading(true);
-            
+    
             // Fetch theses
             const { data: thesesData, error: thesesError } = await supabase
                 .from("Thesis")
                 .select("*")
                 .eq('status', 'Active');
-
+    
             if (thesesError) {
                 console.error("Error fetching theses:", thesesError);
                 setLoading(false);
                 return;
             }
-            
-            // Simulate fetching additional metadata
+    
             const enhancedData = thesesData.map(thesis => ({
                 ...thesis,
-                authorName: `Author ${thesis.authorID}`, // Replace with actual author name fetch
+                authorName: `Author ${thesis.authorID}`,
                 views: Math.floor(Math.random() * 500) + 50,
                 likes: Math.floor(Math.random() * 100) + 5,
                 comments: Math.floor(Math.random() * 20)
             }));
-            
-            console.log("Fetched theses: ", enhancedData);
-            setItems(enhancedData)
+    
+            setItems(enhancedData);
             setFilteredThesis(enhancedData);
             setLoading(false);
         };
-
-        // Fetch user bookmarks
+    
         const fetchBookmarks = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (user && !userError) {
                 const { data, error } = await supabase
                     .from("UserBookmarks")
-                    .select("thesisID")
+                    .select("thesisID") // Ensure correct field name
                     .eq('userID', user.id);
-                
+        
                 if (!error && data) {
-                    setBookmarks(data.map(item => item.thesisID));
+                    setBookmarks(data.map(item => item.thesisID)); // Check if this is correct
+                } else {
+                    setBookmarks([]);
                 }
+            } else {
+                setBookmarks([]);
             }
         };
-
+        
+    
         fetchTheses();
         fetchBookmarks();
-    }, []); 
+    }, []);
+    
+    
     // Filter the theses when searchQuery changes
   useEffect(() => {
     if (!searchQuery) {
@@ -170,10 +177,13 @@ const ContentList = ({searchQuery} : Search) => {
                                     className="focus:outline-none transition-transform hover:scale-110"
                                     aria-label={bookmarks.includes(item.thesisID) ? "Remove bookmark" : "Add bookmark"}
                                 >
-                                    {bookmarks.includes(item.thesisID) ? 
-                                        <Star className="w-5 h-5 text-aqua-400 fill-aqua-400" /> : 
-                                        <StarOff className="w-5 h-5 text-gray-400" />
-                                    }
+                                   {bookmarks.includes(item.thesisID) ? (
+                                    <Star className="w-5 h-5 text-violet-400 fill-violet-400" />
+                                    ) : (
+                                    <Star className="w-5 h-5 text-gray-400" /> // Use Star here too
+                                    )}
+
+
                                 </button>
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
