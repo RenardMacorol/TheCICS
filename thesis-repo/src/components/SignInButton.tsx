@@ -1,31 +1,21 @@
 import { supabase } from '../api/supabase';
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Login from '../service/Login';
 import { User } from '@supabase/supabase-js';
 
 const SignIn = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [,setUser] = useState<User>();
     const [errorMessage, setErrorMessage] = useState<string | null>(null); // State to store error messages
          
     useEffect(() => {
-    const checkUser = async () => {
-      const { data: user } = await supabase.auth.getUser();
-
-      // If user exists and has an NEU email, allow access
-      if (user?.user && user.user.email?.endsWith("@neu.edu.ph")) {
-        setUser(user.user);
-        navigate("/dashboard");
-      } else {
-        // If user is logged in with a non-NEU email, show error and sign them out
-        await supabase.auth.signOut();
+      if (location.state?.errorMessage) {
+          setErrorMessage(location.state.errorMessage);
       }
-    };
-
-    checkUser();
-  }, [navigate]);
+  }, [location.state]);
 
 
   return (
