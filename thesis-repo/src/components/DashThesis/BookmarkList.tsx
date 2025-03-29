@@ -2,21 +2,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../api/supabase";
 import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil } from 'lucide-react';
+import Thesis from "../../service/Table/Thesis";
 
-type Thesis = {
-    thesisID: string;
-    authorID: number;
-    title: string;
-    abstract: string;
-    publicationYear: number;
-    keywords: string;
-    pdfFileUrl: string;
-    status: string;
-    authorName?: string;
-    views?: number;
-    likes?: number;
-    comments?: number;
-}
+
 
 interface Search {
     searchQuery: string;

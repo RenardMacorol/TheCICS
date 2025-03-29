@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import Login from '../service/Login';
+import Login from '../service/LogInService/Login';
 
 const SignIn = () => {
     const location = useLocation();

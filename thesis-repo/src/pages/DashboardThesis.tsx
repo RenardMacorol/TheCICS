@@ -5,7 +5,7 @@ import { User } from "@supabase/supabase-js";
 import ContentList from "../components/DashThesis/ContentList";
 import DashNavTop from '../components/DashThesis/DashNavTop';
 import FilterButton from "../components/DashThesis/FilterButton";
-import restrictChecker from "../service/RestrictChecker";
+import restrictChecker from "../service/UserHandler/RestrictChecker";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [, setUser] = useState<User |null>(null);

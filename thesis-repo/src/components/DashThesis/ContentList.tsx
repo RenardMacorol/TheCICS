@@ -4,21 +4,8 @@ import { supabase } from "../../api/supabase";
 
 import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
 import CitationModal from "./CitationModal";
+import Thesis from "../../service/Table/Thesis";
 
-interface Thesis  {
-    thesisID: string;
-    authorID: number;
-    title: string;
-    abstract: string;
-    publicationYear: number;
-    keywords: string;
-    pdfFileUrl: string;
-    status: string;
-    authorName?: string;
-    views?: number;
-    likes?: number;
-    comments?: number;
-}
 
 
 interface Search{

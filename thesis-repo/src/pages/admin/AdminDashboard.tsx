@@ -3,17 +3,9 @@ import { supabase } from "../../api/supabase";
 import { User } from "lucide-react";
 import ThesisUpload from './ThesisUpload';
 import { useNavigate } from "react-router-dom";
+import Users from "../../service/Table/User";
 
 
-interface User {
-  userID: string;
-  name: string;
-  email: string;
-  googleAuthID: string;
-  role: string;
-  profilePicture: string | null;
-  dateRegistered: string;
-}
 
 interface Thesis {
   thesisID: number;
@@ -29,10 +21,10 @@ interface Thesis {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<Users[]>([]);
   const [loading, setLoading] = useState(true);
   const [newUser, setNewUser] = useState({ name: "", email: "", role: "Student" });
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<Users | null>(null);
   const [theses, setTheses] = useState<Thesis[]>([]);
   const [loadingTheses, setLoadingTheses] = useState(true);
 

@@ -1,20 +1,8 @@
 import React, { useState } from "react";
 import { Copy, X, Check, Link, ChevronDown } from 'lucide-react';
+import Thesis from "../../service/Table/Thesis";
 
-type Thesis = {
-    thesisID: string;
-    authorID: number;
-    title: string;
-    abstract: string;
-    publicationYear: number;
-    keywords: string;
-    pdfFileUrl: string;
-    status: string;
-    authorName?: string;
-    views?: number;
-    likes?: number;
-    comments?: number;
-}
+
 
 type CitationModalProps = {
   thesis: Thesis | null;
