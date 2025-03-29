@@ -84,8 +84,25 @@ const AdminDashboard = () => {
   };
 
   const handleRestrictUser = async (userID: string) => {
+    //This should be restrict refactor soon
     console.log("Restricting", userID);
-    //This should be restring refactor soon 
+  
+    console.log("Attempting to update user:", editingUser);
+  
+    const { error } = await supabase
+      .from("Users")
+      .update({
+        accessType: "Restrict" 
+      })
+      .eq("userID", userID);
+  
+    if (error) {
+      console.error("❌ Error updating user:", error);
+    } else {
+      console.log("✅ User updated successfully");
+      fetchUsers();
+      setEditingUser(null);
+    } 
   };
 
   const handleUpdateUser = async () => {
@@ -226,7 +243,7 @@ return (
                 <td className="border border-gray-300 p-2">{user.role}</td>
                 <td className="border border-gray-300 p-2 flex gap-2">
                   <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded" onClick={() => setEditingUser(user)}>Edit</button>
-                  <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleRestrictUser(user.userID)}>Delete</button>
+                  <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleRestrictUser(user.userID)}>Restrict</button>
                 </td>
               </tr>
             ))}

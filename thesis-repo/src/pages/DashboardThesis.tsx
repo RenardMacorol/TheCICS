@@ -5,9 +5,11 @@ import { User } from "@supabase/supabase-js";
 import ContentList from "../components/DashThesis/ContentList";
 import DashNavTop from '../components/DashThesis/DashNavTop';
 import FilterButton from "../components/DashThesis/FilterButton";
+import restrictChecker from "../service/RestrictChecker";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [, setUser] = useState<User |null>(null);
+  const [restrict, setRestrict] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -32,6 +34,7 @@ const Dashboard = () => {
       });
 
       if (insertError) console.error("Error inserting user:", insertError);
+      setRestrict(await restrictChecker(user.id))
 
       setUser(user);
     };
@@ -40,10 +43,19 @@ const Dashboard = () => {
   }, [navigate]);
 
 return(
+  
   <div className="bg-gray-100 min-h-screen text-white">
     <DashNavTop setSearchQuery={setSearchQuery}/>
+    {restrict ? 
+    <p className="flex justify-center items-center font-bold text-5xl text-blue-500">You Are Restricted to this page Please Contact Support -Wonka</p> 
+    :
+    (
+      <div>
     <FilterButton/>
     <ContentList searchQuery={searchQuery}/>
+      </div>
+    )
+    }
   </div>
 )
 }
