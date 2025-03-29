@@ -5,7 +5,7 @@ import { supabase } from "../../api/supabase";
 import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
 import CitationModal from "./CitationModal";
 
-type Thesis = {
+interface Thesis  {
     thesisID: string;
     authorID: number;
     title: string;
