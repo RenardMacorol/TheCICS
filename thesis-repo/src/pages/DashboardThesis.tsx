@@ -5,10 +5,21 @@ import { User } from "@supabase/supabase-js";
 import ContentList from "../components/DashThesis/ContentList";
 import DashNavTop from '../components/DashThesis/DashNavTop';
 import FilterButton from "../components/DashThesis/FilterButton";
+interface FilterState {
+  sort: string;
+  year: string;
+  keywords: string[];
+}
+
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [, setUser] = useState<User |null>(null);
+  const [, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<FilterState>({
+    sort: 'newest',
+    year: 'all',
+    keywords: []
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -39,14 +50,18 @@ const Dashboard = () => {
     fetchUser();
   }, [navigate]);
 
-return(
-  <div className="bg-gray-100 min-h-screen text-white">
-    <DashNavTop setSearchQuery={setSearchQuery}/>
-    <FilterButton/>
-    <ContentList searchQuery={searchQuery}/>
-  </div>
-)
-}
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
+
+  return (
+    <div className="bg-gray-100 min-h-screen text-white">
+      <DashNavTop setSearchQuery={setSearchQuery} />
+      <FilterButton onFilterChange={handleFilterChange} />
+      <ContentList searchQuery={searchQuery} filters={filters} />
+    </div>
+  );
+};
 
 export default Dashboard;
 

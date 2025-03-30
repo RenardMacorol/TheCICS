@@ -174,7 +174,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                         className="focus:outline-none transition-transform hover:scale-110"
                                         aria-label="Remove bookmark"
                                     >
-                                        <Star className="w-5 h-5 text-aqua-400 fill-aqua-400" />
+                                        <Star className="w-5 h-5 text-cyan-400 fill-cyan-400" />
                                     </button>
                                     <button
                                         onClick={() => alert(`Clicked on ${item.title}`)}
@@ -255,7 +255,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                 </button>
                                 <button 
                                     onClick={() => window.open(item.pdfFileUrl, "_blank")}
-                                    className="flex items-center gap-1 bg-aqua-100 text-aqua-700 rounded-full px-3 py-1 text-sm hover:bg-aqua-200 transition-colors"
+                                    className="flex items-center gap-1 bg-cyan-100 text-cyan-700 rounded-full px-3 py-1 text-sm hover:bg-cyan-200 transition-colors"
                                 >
                                     <Pencil size={16} />
                                     <span>View</span>

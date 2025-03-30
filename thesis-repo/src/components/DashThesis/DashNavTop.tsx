@@ -133,7 +133,7 @@ const DashNavTop = ({setSearchQuery}:Search) => {
                     >
                         <Bell className="w-5 h-5"/>
                         {unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-aqua-400 text-violet-900 text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                            <span className="absolute -top-1 -right-1 bg-cyan-400 text-violet-900 text-xs rounded-full w-4 h-4 flex items-center justify-center">
                                 {unreadCount}
                             </span>
                         )}
@@ -274,7 +274,7 @@ const DashNavTop = ({setSearchQuery}:Search) => {
                             <button 
                                 className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800"
                             >
-                                <BookMarked className="w-5 h-5 mr-3 text-aqua-400" />
+                                <BookMarked className="w-5 h-5 mr-3 text-cyan-400" />
                                 <span>My Theses</span>
                             </button>
                         </li>
@@ -283,13 +283,13 @@ const DashNavTop = ({setSearchQuery}:Search) => {
                                 className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800"
                                 onClick={navigateToBookmarked}
                             >
-                                <Bookmark className="w-5 h-5 mr-3 text-aqua-400" />
+                                <Bookmark className="w-5 h-5 mr-3 text-cyan-400" />
                                 <span>Bookmarked Theses</span>
                             </button>
                         </li>
                         <li>
                             <button className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800">
-                                <Lightbulb className="w-5 h-5 mr-3 text-aqua-400" />
+                                <Lightbulb className="w-5 h-5 mr-3 text-cyan-400" />
                                 <span>Recommendations</span>
                             </button>
                         </li>
