@@ -53,33 +53,53 @@ const ThesisUpload = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
-      setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+      
+      // Filter PDFs only
+      const pdfFiles = selectedFiles.filter(file => file.type === "application/pdf");
+  
+      if (pdfFiles.length !== selectedFiles.length) {
+        setMessage("❌ Only PDF files are allowed!");
+      }
+  
+      setFiles((prevFiles) => [...prevFiles, ...pdfFiles]);
     }
   };
-
+  
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const droppedFiles = Array.from(e.dataTransfer.files);
-    setFiles((prevFiles) => [...prevFiles, ...droppedFiles]);
+  
+    // Filter PDFs only
+    const pdfFiles = droppedFiles.filter(file => file.type === "application/pdf");
+  
+    if (pdfFiles.length !== droppedFiles.length) {
+      setMessage("❌ Only PDF files are allowed!");
+    }
+  
+    setFiles((prevFiles) => [...prevFiles, ...pdfFiles]);
   };
-
   const removeFile = (index: number) => {
     setFiles(files.filter((_, i) => i !== index));
   };
 
   // Handle file upload
   const handleUpload = async () => {
+    if (!title || !abstract || !publicationYear || !keywords || (!selectedAuthor && !newAuthor)) {
+      setMessage("❌ Please complete all fields before uploading.");
+      return;
+    }
+  
     if (files.length === 0) {
       setMessage("❌ Please select a file.");
       return;
     }
-
+  
     setUploading(true);
     setProgress(0);
     setMessage("");
-
+    
     let finalAuthorID: number | null;
-
+  
     // Insert new author if needed
     if (newAuthor) {
       const { data, error } = await supabase
@@ -87,7 +107,7 @@ const ThesisUpload = () => {
         .insert([{ firstName: newAuthor.firstName, lastName: newAuthor.lastName }])
         .select("authorID")
         .single();
-
+  
       if (error) {
         setMessage(`❌ Error adding new author: ${error.message}`);
         setUploading(false);
@@ -97,12 +117,12 @@ const ThesisUpload = () => {
     } else {
       finalAuthorID = parseInt(selectedAuthor);
     }
-
+  
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const fileName = `${Date.now()}_${file.name}`;
       const filePath = `thesis/${fileName}`;
-
+  
       // Upload to Supabase Storage
       const { error } = await supabase.storage.from("thesis-storage").upload(filePath, file);
       if (error) {
@@ -110,10 +130,10 @@ const ThesisUpload = () => {
         setUploading(false);
         return;
       }
-
+  
       // Get public URL
       const { data: fileData } = supabase.storage.from("thesis-storage").getPublicUrl(filePath);
-
+  
       // Get logged-in user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -121,9 +141,9 @@ const ThesisUpload = () => {
         setUploading(false);
         return;
       }
-
+  
       const randomThesisID = Math.floor(100 + Math.random() * 900);
-
+  
       // Save file info to database
       const { error: insertError } = await supabase.from("Thesis").insert([
         {
@@ -137,7 +157,7 @@ const ThesisUpload = () => {
           status: "Active"
         },
       ]);
-
+  
       if (insertError) {
         setMessage(`❌ Database error: ${insertError.message}`);
         setUploading(false);
@@ -145,13 +165,14 @@ const ThesisUpload = () => {
       }
       setProgress(((i + 1) / files.length) * 100);
     }
-
+  
     setUploading(false);
     setFiles([]); // Clear file list
     setTitle("");
     setAbstract("");
     setPublicationYear("");
     setKeywords("");
+    setSelectedAuthor("");
     setMessage("✅ File uploaded successfully!");
   };
 

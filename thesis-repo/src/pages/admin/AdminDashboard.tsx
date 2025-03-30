@@ -6,6 +6,16 @@ import { useNavigate } from "react-router-dom";
 import Users from "../../service/Table/User";
 
 
+interface User {
+  userID: string;
+  name: string;
+  email: string;
+  googleAuthID: string;
+  role: string;
+  profilePicture: string | null;
+  dateRegistered: string;
+  isActive: boolean; //active & deactivate
+}
 
 interface Thesis {
   thesisID: number;
@@ -158,22 +168,26 @@ const handleRestrictThesis = async (thesisID: number) => {
   }
 };
 
-// Delete Thesis
-const handleDeleteThesis = async (thesisID: number) => {
-  console.log("🔄 Attempting to delete thesis with ID:", thesisID);
-  const { error } = await supabase
+    // Delete Thesis
+    const handleDeleteThesis = async (thesisID: number) => {
+    console.log("🔄 Attempting to delete thesis with ID:", thesisID);
+
+   const { error } = await supabase
     .from("Thesis")
     .delete()
-    .eq("thesisID", thesisID);
+    .match({ thesisID });
 
   if (error) {
-    console.error("❌ Error deleting thesis:", error);
-  } else {
-    console.log("✅ Thesis deleted successfully");
-    setTheses(theses.filter((thesis) => thesis.thesisID !== thesisID));
+    console.error("❌ Error deleting thesis:", error.message);
+    alert("Failed to delete. Check Supabase RLS or constraints.");
+    return;
   }
+
+  console.log("✅ Thesis deleted successfully");
+
+  // Filter out deleted thesis from the local state
+  setTheses((prevTheses) => prevTheses.filter((thesis) => thesis.thesisID !== thesisID));
 };
-  
 
 return (
   <div className="pt-24 p-5">
@@ -223,58 +237,72 @@ return (
               <th className="border border-gray-300 p-2">Name</th>
               <th className="border border-gray-300 p-2">Email</th>
               <th className="border border-gray-300 p-2">Role</th>
+              <th className="border border-gray-300 p-2">Status</th>
               <th className="border border-gray-300 p-2">Actions</th>
+
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+          {users.map((user) => (
               <tr key={user.userID} className="border border-gray-300">
                 <td className="border border-gray-300 p-2">{user.userID}</td>
                 <td className="border border-gray-300 p-2">{user.name}</td>
                 <td className="border border-gray-300 p-2">{user.email}</td>
                 <td className="border border-gray-300 p-2">{user.role}</td>
+                <td className="border border-gray-300 p-2">{user.isActive ? "Active" : "Inactive"}</td>
                 <td className="border border-gray-300 p-2 flex gap-2">
+                  <button className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">Active</button>
+                  <button className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded">Deactivate</button>
                   <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded" onClick={() => setEditingUser(user)}>Edit</button>
                   <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleRestrictUser(user.userID)}>Restrict</button>
                 </td>
-              </tr>
+            </tr>
             ))}
           </tbody>
         </table>
       )}
     </div>
         {/* Edit User Section */}
-            {editingUser && (
-              <div className="mt-5 p-3 border border-gray-300 rounded bg-white shadow-md">
+          {editingUser && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50">
+            <div className="bg-white p-5 rounded-lg shadow-lg w-96">
               <h2 className="text-2xl font-semibold text-gray-800">Edit User</h2>
-                <input className="border border-gray-300 p-2 m-2 rounded w-full" 
-                  type="text" 
-                  value={editingUser.name} 
-                  onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })} 
-                    />
-                <input className="border border-gray-300 p-2 m-2 rounded w-full" 
-                  type="email" 
-                  value={editingUser.email} 
-                  onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })} 
-                    />
-                <select className="border border-gray-300 p-2 m-2 rounded w-full" 
-                 value={editingUser.role} 
-                  onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}>
-                        <option value="Student">Student</option>
-                        <option value="Faculty">Faculty</option>
-                        <option value="Admin">Admin</option>
-                      </select>
-                <button className="bg-[#06B8BE] hover:bg-[#05A3A8] text-white p-2 rounded w-full mt-2" 
-                  onClick={handleUpdateUser}>
-                  Save Changes
-                </button>
-                <button className="mt-2 bg-gray-500 hover:bg-gray-600 text-white p-2 rounded w-full" 
-                  onClick={() => setEditingUser(null)}>
-                  Cancel
-              </button>
-              </div>
-              )}
-
+      <input
+        className="border border-gray-300 p-2 m-2 rounded w-full"
+        type="text"
+        value={editingUser.name}
+        onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+      />
+      <input
+        className="border border-gray-300 p-2 m-2 rounded w-full"
+        type="email"
+        value={editingUser.email}
+        onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+      />
+      <select
+        className="border border-gray-300 p-2 m-2 rounded w-full"
+        value={editingUser.role}
+        onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+      >
+        <option value="Student">Student</option>
+        <option value="Faculty">Faculty</option>
+        <option value="Admin">Admin</option>
+      </select>
+      <button
+        className="bg-[#06B8BE] hover:bg-[#05A3A8] text-white p-2 rounded w-full mt-2"
+        onClick={handleUpdateUser}
+      >
+        Save Changes
+      </button>
+      <button
+        className="mt-2 bg-gray-500 hover:bg-gray-600 text-white p-2 rounded w-full"
+        onClick={() => setEditingUser(null)}
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
            {/* Thesis Management & Upload */}
             <div className="flex justify-between mt-5">
           {/* Left: Manage Theses */}
@@ -287,14 +315,14 @@ return (
 
           {/* Title Inside the Table */}
              <caption className="text-2xl font-semibold text-gray-800 p-4 bg-[#5CE1E6] border border-gray-300">
-              Manage Theses
+              Thesis Management
              </caption>
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2 text-left">Thesis ID</th>
-                <th className="border border-gray-300 p-2 text-left">Title</th>
-                <th className="border border-gray-300 p-2 text-left">Status</th>
-                <th className="border border-gray-300 p-2 text-left">Actions</th>
+                <th className="border border-gray-300 p-2">Thesis ID</th>
+                <th className="border border-gray-300 p-2">Title</th>
+                <th className="border border-gray-300 p-2">Status</th>
+                <th className="border border-gray-300 p-2">Actions</th>
               </tr>
             </thead>
             <tbody>
