@@ -6,6 +6,7 @@ interface Users {
   role: string;
   profilePicture: string | null;
   dateRegistered: string;
+  isActive: boolean;
 }
 
 export default Users;

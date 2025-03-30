@@ -177,7 +177,7 @@ const ThesisUpload = () => {
   };
 
   return (
-    <div className="p-6 max-h-[80vh] overflow-y-auto">
+    <div className="p-6">
       {/* Header */}
       <div className="bg-[#5CE1E6] p-5 -m-6 mb-6 text-center">
         <h3 className="text-xl font-medium text-black">Upload New Thesis</h3>

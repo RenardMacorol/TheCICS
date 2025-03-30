@@ -4,18 +4,7 @@ import { User } from "lucide-react";
 import ThesisUpload from './ThesisUpload';
 import { useNavigate } from "react-router-dom";
 import Users from "../../service/Table/User";
-
-
-interface User {
-  userID: string;
-  name: string;
-  email: string;
-  googleAuthID: string;
-  role: string;
-  profilePicture: string | null;
-  dateRegistered: string;
-  isActive: boolean; //active & deactivate
-}
+import AdminNavTop from "../../components/DashThesis/AdminNavTop";
 
 interface Thesis {
   thesisID: number;
@@ -28,7 +17,6 @@ interface Thesis {
   status: "Active" | "Inactive"; // Based on ThesisStatusEnums
 }
 
-
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<Users[]>([]);
@@ -37,7 +25,9 @@ const AdminDashboard = () => {
   const [editingUser, setEditingUser] = useState<Users | null>(null);
   const [theses, setTheses] = useState<Thesis[]>([]);
   const [loadingTheses, setLoadingTheses] = useState(true);
-
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+  
   useEffect(() => {
     fetchUsers();
     fetchTheses();
@@ -84,6 +74,7 @@ const AdminDashboard = () => {
       setNewUser({ name: "", email: "", role: "Student" });
     }
   };
+  
 
   const handleRestrictUser = async (userID: string) => {
     //This should be restrict refactor soon
@@ -168,29 +159,58 @@ const handleRestrictThesis = async (thesisID: number) => {
   }
 };
 
-    // Delete Thesis
-    const handleDeleteThesis = async (thesisID: number) => {
-    console.log("🔄 Attempting to delete thesis with ID:", thesisID);
-
-   const { error } = await supabase
+// Delete Thesis
+const handleDeleteThesis = async (thesisID: number) => {
+  console.log("🔄 Attempting to delete thesis with ID:", thesisID);
+  const { error } = await supabase
     .from("Thesis")
     .delete()
-    .match({ thesisID });
+    .eq("thesisID", thesisID);
 
   if (error) {
-    console.error("❌ Error deleting thesis:", error.message);
-    alert("Failed to delete. Check Supabase RLS or constraints.");
-    return;
+    console.error("❌ Error deleting thesis:", error);
+  } else {
+    console.log("✅ Thesis deleted successfully");
+    setTheses(theses.filter((thesis) => thesis.thesisID !== thesisID));
   }
-
-  console.log("✅ Thesis deleted successfully");
-
-  // Filter out deleted thesis from the local state
-  setTheses((prevTheses) => prevTheses.filter((thesis) => thesis.thesisID !== thesisID));
 };
 
+const filteredAndSortedTheses = theses
+  .filter((thesis) => {
+    // Filter by search query (title or ID)
+    const matchesSearch =
+      thesis.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      thesis.thesisID.toString().includes(searchQuery);
+
+    // Normalize status to lowercase for comparison
+    const thesisStatus = thesis.status.toLowerCase();
+    const filterStatusLower = filterStatus.toLowerCase();
+
+    // Filter by status if not 'All'
+    const matchesStatus =
+      filterStatusLower === "all" ||
+      (filterStatusLower === "active" && thesisStatus === "active") ||
+      (filterStatusLower === "inactive" &&
+        (thesisStatus === "inactive" || thesisStatus === "restricted"));
+
+    return matchesSearch && matchesStatus;
+  })
+  // Sort so that Active is on top and Inactive/Restricted at the bottom
+  .sort((a, b) => {
+    const statusA = a.status.toLowerCase();
+    const statusB = b.status.toLowerCase();
+
+    if (statusA === "active" && statusB !== "active") return -1;
+    if (statusA !== "active" && statusB === "active") return 1;
+    return 0;
+  });
+
+  
 return (
   <div className="pt-24 p-5">
+    {/* Call AdminNavTop here */}
+    <AdminNavTop userName="Admin" />
+    
     {/* Navbar */}
     <nav className="w-full fixed top-0 left-0 bg-[#06B8BE] text-white px-6 py-4 flex justify-between items-center shadow-md">
       {/* Logo & Title Wrapper */}
@@ -249,15 +269,30 @@ return (
                 <td className="border border-gray-300 p-2">{user.name}</td>
                 <td className="border border-gray-300 p-2">{user.email}</td>
                 <td className="border border-gray-300 p-2">{user.role}</td>
-                <td className="border border-gray-300 p-2">{user.isActive ? "Active" : "Inactive"}</td>
-                <td className="border border-gray-300 p-2 flex gap-2">
-                  <button className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">Active</button>
-                  <button className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded">Deactivate</button>
-                  <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded" onClick={() => setEditingUser(user)}>Edit</button>
-                  <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleRestrictUser(user.userID)}>Restrict</button>
-                </td>
-            </tr>
-            ))}
+                {/* Corrected status condition */}
+                <td className="border border-gray-300 p-2"> {user.isActive ? "Active" : "Restricted"}</td>
+                {/* Centering buttons properly */}
+                  <td className="border border-gray-300 p-2 flex justify-center items-center gap-2">
+                  <button
+                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+                    >
+                      Active
+                    </button>
+                      <button
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+                      onClick={() => setEditingUser(user)}
+                        >
+                        Edit
+                      </button>
+                      <button
+                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                            onClick={() => handleRestrictUser(user.userID)}
+                          >
+                            Restrict
+                        </button>
+                       </td>
+                  </tr>
+               ))}
           </tbody>
         </table>
       )}
@@ -303,47 +338,89 @@ return (
     </div>
   </div>
 )}
-           {/* Thesis Management & Upload */}
+            {/* Thesis Management & Upload */}
             <div className="flex justify-between mt-5">
-          {/* Left: Manage Theses */}
-            <div className="w-1/2 pr-4">
-           
-          {loadingTheses ? (
-          <p className="text-gray-500">Loading theses...</p>
-        ) : (
-          <table className="w-full border-collapse border border-gray-300 mt-2 bg-white text-black shadow-md rounded-md">
+              {/* Left: Manage Theses */}
+              <div className="w-1/2 pr-4">
+                {/* Title Outside the Table */}
+                <div className="text-2xl font-semibold text-gray-800 p-4 bg-[#5CE1E6] border border-gray-300 rounded-t-md text-center">
+                  Thesis Management
+                </div>
 
-          {/* Title Inside the Table */}
-             <caption className="text-2xl font-semibold text-gray-800 p-4 bg-[#5CE1E6] border border-gray-300">
-              Thesis Management
-             </caption>
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2">Thesis ID</th>
-                <th className="border border-gray-300 p-2">Title</th>
-                <th className="border border-gray-300 p-2">Status</th>
-                <th className="border border-gray-300 p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {theses.map((thesis) => (
-                <tr key={thesis.thesisID} className="border border-gray-300 hover:bg-gray-50">
-                  <td className="border border-gray-300 p-2">{thesis.thesisID}</td>
-                  <td className="border border-gray-300 p-2">{thesis.title}</td>
-                  <td className="border border-gray-300 p-2">{thesis.status}</td>
-                  <td className="border border-gray-300 p-2">
-                  <div className="flex space-x-1">
-                    <button className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded m-1" onClick={() => handleApproveThesis(thesis.thesisID)}>Approve</button>
-                    <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded m-1" onClick={() => handleRestrictThesis(thesis.thesisID)}>Restrict</button>
-                    <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded m-1" onClick={() => handleDeleteThesis(thesis.thesisID)}>Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+             
+    {/* Search Input and Status Dropdown */}
+    <div className="flex justify-center items-center space-x-4 p-4 bg-white border-x border-b border-gray-300 rounded-b-md">
+      {/* Search Input */}
+      <input
+        type="text"
+        placeholder="Search by title or ID..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-3/4 p-2 border border-gray-300 rounded"
+      />
+      
+      {/* Status Dropdown */}
+      <select
+        value={filterStatus}
+        onChange={(e) => setFilterStatus(e.target.value)}
+        className="p-2 border border-gray-300 rounded"
+      >
+        <option value="All">All</option>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+      </select>
+    </div>
+
+    {loadingTheses ? (
+      <p className="text-gray-500 p-4">Loading theses...</p>
+    ) : (
+      <table className="w-full border-collapse border border-gray-300 mt-2 bg-white text-black shadow-md rounded-md">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border border-gray-300 p-2">Thesis ID</th>
+            <th className="border border-gray-300 p-2">Title</th>
+            <th className="border border-gray-300 p-2">Status</th>
+            <th className="border border-gray-300 p-2">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {filteredAndSortedTheses.map((thesis) => (
+            <tr
+              key={thesis.thesisID}
+              className="border border-gray-300 hover:bg-gray-50"
+            >
+              <td className="border border-gray-300 p-2">{thesis.thesisID}</td>
+              <td className="border border-gray-300 p-2">{thesis.title}</td>
+              <td className="border border-gray-300 p-2">{thesis.status}</td>
+              <td className="border border-gray-300 p-2">
+                <div className="flex space-x-1">
+                  <button
+                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded m-1"
+                    onClick={() => handleApproveThesis(thesis.thesisID)}
+                  >
+                    Approve
+                  </button>
+                  <button
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded m-1"
+                    onClick={() => handleRestrictThesis(thesis.thesisID)}
+                  >
+                    Restrict
+                  </button>
+                  <button
+                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded m-1"
+                    onClick={() => handleDeleteThesis(thesis.thesisID)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+</div>
 
       {/* Right: Upload Thesis */}
       <div className="w-1/2 pl-4">
@@ -355,8 +432,3 @@ return (
 };
 
 export default AdminDashboard;
-
-
-
-
-
