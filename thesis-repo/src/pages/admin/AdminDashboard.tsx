@@ -3,6 +3,8 @@ import { supabase } from "../../api/supabase";
 import { User } from "lucide-react";
 import ThesisUpload from './ThesisUpload';
 import { useNavigate } from "react-router-dom";
+import Users from "../../service/Table/User";
+
 
 interface User {
   userID: string;
@@ -29,10 +31,10 @@ interface Thesis {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<Users[]>([]);
   const [loading, setLoading] = useState(true);
   const [newUser, setNewUser] = useState({ name: "", email: "", role: "Student" });
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<Users | null>(null);
   const [theses, setTheses] = useState<Thesis[]>([]);
   const [loadingTheses, setLoadingTheses] = useState(true);
 
@@ -83,17 +85,26 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteUser = async (userID: string) => {
-    console.log("Attempting to delete user with ID:", userID);
-    
-    const { error } = await supabase.from("Users").delete().eq("userID", userID);
+  const handleRestrictUser = async (userID: string) => {
+    //This should be restrict refactor soon
+    console.log("Restricting", userID);
+  
+    console.log("Attempting to update user:", editingUser);
+  
+    const { error } = await supabase
+      .from("Users")
+      .update({
+        accessType: "Restrict" 
+      })
+      .eq("userID", userID);
   
     if (error) {
-      console.error("❌ Error deleting user:", error);
+      console.error("❌ Error updating user:", error);
     } else {
-      console.log("✅ User deleted successfully");
+      console.log("✅ User updated successfully");
       fetchUsers();
-    }
+      setEditingUser(null);
+    } 
   };
 
   const handleUpdateUser = async () => {
@@ -243,7 +254,7 @@ return (
                   <button className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">Active</button>
                   <button className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded">Deactivate</button>
                   <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded" onClick={() => setEditingUser(user)}>Edit</button>
-                  <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleDeleteUser(user.userID)}>Delete</button>
+                  <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleRestrictUser(user.userID)}>Restrict</button>
                 </td>
             </tr>
             ))}
