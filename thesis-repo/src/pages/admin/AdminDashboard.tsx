@@ -98,6 +98,23 @@ const AdminDashboard = () => {
     } 
   };
 
+  const handleActivateUser = async (userID: string) => {
+    console.log("🔄 Attempting to activate user:", userID);
+  
+    const { error } = await supabase
+      .from("Users")
+      .update({ accessType: "Active" }) // Ensure this column matches your DB schema
+      .eq("userID", userID);
+  
+    if (error) {
+      console.error("❌ Error activating user:", error);
+    } else {
+      console.log("✅ User activated successfully");
+      fetchUsers(); // Refresh user list
+    }
+  };
+  
+
   const handleUpdateUser = async () => {
     if (!editingUser) return;
   
@@ -252,45 +269,43 @@ return (
       {loading ? <p className="text-gray-500 p-4">Loading users...</p> : (
         <table className="w-full border-collapse border border-gray-300 bg-white text-gray-800 shadow-md mt-0">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-2">User ID</th>
-              <th className="border border-gray-300 p-2">Name</th>
-              <th className="border border-gray-300 p-2">Email</th>
-              <th className="border border-gray-300 p-2">Role</th>
-              <th className="border border-gray-300 p-2">Status</th>
-              <th className="border border-gray-300 p-2">Actions</th>
-
-            </tr>
-          </thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 p-2">User ID</th>
+                <th className="border border-gray-300 p-2">Name</th>
+                <th className="border border-gray-300 p-2">Email</th>
+                <th className="border border-gray-300 p-2">Role</th>
+                <th className="border border-gray-300 p-2">Actions</th>
+              </tr>
+            </thead>
           <tbody>
           {users.map((user) => (
-              <tr key={user.userID} className="border border-gray-300">
-                <td className="border border-gray-300 p-2">{user.userID}</td>
-                <td className="border border-gray-300 p-2">{user.name}</td>
-                <td className="border border-gray-300 p-2">{user.email}</td>
-                <td className="border border-gray-300 p-2">{user.role}</td>
-                {/* Corrected status condition */}
-                <td className="border border-gray-300 p-2"> {user.isActive ? "Active" : "Restricted"}</td>
-                {/* Centering buttons properly */}
-                  <td className="border border-gray-300 p-2 flex justify-center items-center gap-2">
-                  <button
-                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
-                    >
-                      Active
-                    </button>
-                      <button
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                      onClick={() => setEditingUser(user)}
-                        >
-                        Edit
-                      </button>
-                      <button
-                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                            onClick={() => handleRestrictUser(user.userID)}
-                          >
-                            Restrict
-                        </button>
-                       </td>
+               <tr key={user.userID} className="border border-gray-300">
+               <td className="border border-gray-300 p-2">{user.userID}</td>
+               <td className="border border-gray-300 p-2">{user.name}</td>
+               <td className="border border-gray-300 p-2">{user.email}</td>
+               <td className="border border-gray-300 p-2">{user.role}</td>
+               <td className="border border-gray-300 p-2 flex justify-center items-center gap-2">
+               <button
+                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+                  onClick={() => handleActivateUser(user.userID)}
+                  >
+                    Active
+                  </button>
+
+                 <button
+                   className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+                   onClick={() => setEditingUser(user)}
+                 >
+                   Edit
+                 </button>
+
+                 <button
+                   className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                   onClick={() => handleRestrictUser(user.userID)}
+                 >
+                   Restrict
+                 </button>
+               </td>
                   </tr>
                ))}
           </tbody>
