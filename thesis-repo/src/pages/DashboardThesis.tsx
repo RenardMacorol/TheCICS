@@ -6,11 +6,24 @@ import ContentList from "../components/DashThesis/ContentList";
 import DashNavTop from '../components/DashThesis/DashNavTop';
 import FilterButton from "../components/DashThesis/FilterButton";
 import restrictChecker from "../service/UserHandler/RestrictChecker";
+interface FilterState {
+  sort: string;
+  year: string;
+  keywords: string[];
+}
+
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [, setUser] = useState<User |null>(null);
   const [restrict, setRestrict] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<FilterState>({
+    sort: 'newest',
+    year: 'all',
+    keywords: []
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -42,23 +55,20 @@ const Dashboard = () => {
     fetchUser();
   }, [navigate]);
 
-return(
-  
-  <div className="bg-gray-100 min-h-screen text-white">
-    <DashNavTop setSearchQuery={setSearchQuery}/>
-    {restrict ? 
-    <p className="flex justify-center items-center font-bold text-5xl text-blue-500">You Are Restricted to this page Please Contact Support -Wonka</p> 
-    :
-    (
-      <div>
-    <FilterButton/>
-    <ContentList searchQuery={searchQuery}/>
-      </div>
-    )
-    }
-  </div>
-)
-}
+
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
+
+  return (
+    <div className="bg-gray-100 min-h-screen text-white">
+      <DashNavTop setSearchQuery={setSearchQuery} />
+      <FilterButton onFilterChange={handleFilterChange} />
+      <ContentList searchQuery={searchQuery} filters={filters} />
+    </div>
+  );
+};
+
 
 export default Dashboard;
 

@@ -2,17 +2,44 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../api/supabase";
 
-import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
+
+import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2 } from 'lucide-react';
+
+
 import CitationModal from "./CitationModal";
 import Thesis from "../../service/Table/Thesis";
 
 
-
-interface Search{
-    searchQuery: string;
+type Thesis = {
+    thesisID: string;
+    authorID: number;
+    title: string;
+    abstract: string;
+    publicationYear: number;
+    keywords: string;
+    pdfFileUrl: string;
+    status: string;
+    authorName?: string;
+    views?: number;
+    likes?: number;
+    comments?: number;
+    keywordMatch?: number;
 }
 
-const ContentList = ({searchQuery} : Search) => {
+
+
+interface FilterState {
+    sort: string;
+    year: string;
+    keywords: string[];
+}
+
+interface ContentListProps {
+    searchQuery: string;
+    filters?: FilterState;
+}
+
+const ContentList = ({ searchQuery, filters }: ContentListProps) => {
     const [items, setItems] = useState<Thesis[]>([]);
     const [filteredThesis, setFilteredThesis] = useState<Thesis[]>([]);
     const [bookmarks, setBookmarks] = useState<string[]>([]);
@@ -22,6 +49,7 @@ const ContentList = ({searchQuery} : Search) => {
     const [isCitationModalOpen, setIsCitationModalOpen] = useState(false);
 
     const navigate = useNavigate();
+    
     useEffect(() => {
         const fetchTheses = async () => {
             setLoading(true);
@@ -52,42 +80,96 @@ const ContentList = ({searchQuery} : Search) => {
         };
     
         const fetchBookmarks = async () => {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            const { data: userData, error: userError } = await supabase.auth.getUser();
             
-            if (user && !userError) {
-                const { data, error } = await supabase
-                    .from("UserBookmarks")
-                    .select("thesisID") // Ensure correct field name
-                    .eq('userID', user.id);
-        
-                if (!error && data) {
-                    setBookmarks(data.map(item => item.thesisID)); // Check if this is correct
-                } else {
-                    setBookmarks([]);
-                }
-            } else {
-                setBookmarks([]);
+            if (userError || !userData.user) {
+                console.error("Error fetching user:", userError);
+                return;
             }
+        
+            const userID = userData.user.id;
+            const { data, error } = await supabase
+                .from("UserBookmarks")
+                .select("thesisID") 
+                .eq("userID", userID);
+        
+            if (error) {
+                console.error("Error fetching bookmarks:", error);
+                return;
+            }
+        
+            setBookmarks(data.map(item => item.thesisID)); // Ensure correct state update
         };
         
-    
+
         fetchTheses();
         fetchBookmarks();
     }, []);
     
-    
-    // Filter the theses when searchQuery changes
-  useEffect(() => {
-    if (!searchQuery) {
-      setFilteredThesis(items); // Show all if search is empty
-    } else {
-      setFilteredThesis(
-        items.filter((thesis) =>
-          thesis.title.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      );
-    }
-  }, [searchQuery, items]);
+    useEffect(() => {
+        if (!items.length) return;
+        
+        let filtered = [...items];
+        
+        // Apply search filter
+        if (searchQuery) {
+            const searchLower = searchQuery.toLowerCase();
+            filtered = filtered.filter((thesis) =>
+                thesis.title.toLowerCase().includes(searchLower) || 
+                thesis.abstract.toLowerCase().includes(searchLower) ||
+                thesis.keywords.toLowerCase().includes(searchLower)
+            );
+        }
+        
+        // Apply year filter
+        if (filters?.year && filters.year !== 'all') {
+            filtered = filtered.filter(thesis => 
+                thesis.publicationYear.toString() === filters.year
+            );
+        }
+        
+        // Apply keyword filters and calculate keyword match score
+        if (filters?.keywords && filters.keywords.length > 0) {
+            filtered = filtered.map(thesis => {
+                const thesisKeywords = thesis.keywords.split(',').map(k => k.trim().toLowerCase());
+                const matchCount = filters.keywords.filter(keyword => 
+                    thesisKeywords.includes(keyword.toLowerCase())
+                ).length;
+                
+                return {
+                    ...thesis,
+                    keywordMatch: matchCount
+                };
+            }).filter(thesis => thesis.keywordMatch > 0);
+        }
+        
+        // Apply sorting
+        if (filters?.sort) {
+            switch (filters.sort) {
+                case 'newest':
+                    filtered.sort((a, b) => b.publicationYear - a.publicationYear);
+                    break;
+                case 'popular':
+                    filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
+                    break;
+                case 'recommended':
+                    filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+                    break;
+                case 'keywords':
+                    if (filters.keywords.length > 0) {
+                        // Sort by keyword relevance (number of matching keywords)
+                        filtered.sort((a, b) => {
+                            const aMatch = a.keywordMatch || 0;
+                            const bMatch = b.keywordMatch || 0;
+                            return bMatch - aMatch;
+                        });
+                    }
+                    break;
+            }
+        }
+        
+        setFilteredThesis(filtered);
+    }, [searchQuery, filters, items]);
     
     const toggleAbstract = (thesisID: string) => {
         setExpandedAbstracts(prev => ({
@@ -98,17 +180,19 @@ const ContentList = ({searchQuery} : Search) => {
 
     const handleThesisClick = (thesisID: string) => {
         navigate(`/thesis/${thesisID}`); // Navigate to the thesis details page
-      };
+    };
       
 
     const toggleBookmark = async (thesisID: string) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
+
         const isBookmarked = bookmarks.includes(thesisID);
-        
+    
         if (isBookmarked) {
-            // Remove bookmark
+
+            // Remove bookmark (Juls)
             await supabase
                 .from("UserBookmarks")
                 .delete()
@@ -116,18 +200,58 @@ const ContentList = ({searchQuery} : Search) => {
             
             setBookmarks(bookmarks.filter(id => id !== thesisID));
         } else {
-            // Add bookmark
+            // Add bookmark (Juls)
             await supabase
+
                 .from("UserBookmarks")
-                .insert({ userID: user.id, thesisID });
-            
-            setBookmarks([...bookmarks, thesisID]);
+                .insert([{ userID, thesisID }]);
+    
+            if (insertError) {
+                console.error("Error adding bookmark:", insertError);
+                return;
+            }
+    
+            console.log(`Bookmark for thesisID: ${thesisID} added successfully.`);
+            setBookmarks(prev => [...prev, thesisID]); 
+        } else {
+            console.warn("Bookmark already exists, skipping insert.");
         }
     };
-
+    
     const handleShareClick = (thesis: Thesis) => {
         setSelectedThesis(thesis);
         setIsCitationModalOpen(true);
+    };
+
+    // Function to highlight matching keywords when filters are applied
+    const highlightMatchingKeywords = (keywordString: string) => {
+        if (!filters?.keywords || filters.keywords.length === 0) {
+            return keywordString.split(',').map((keyword, idx) => (
+                <span key={idx} className="bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200 text-xs px-2 py-1 rounded-full">
+                    {keyword.trim()}
+                </span>
+            ));
+        }
+        
+        return keywordString.split(',').map((keyword, idx) => {
+            const trimmed = keyword.trim();
+            const isMatch = filters.keywords.some(
+                filterKeyword => filterKeyword.toLowerCase() === trimmed.toLowerCase()
+            );
+            
+            return (
+                <span 
+                    key={idx} 
+                    className={`text-xs px-2 py-1 rounded-full ${
+                        isMatch 
+                            ? 'bg-violet-200 dark:bg-violet-800 text-violet-800 dark:text-violet-100 font-medium' 
+                            : 'bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200'
+                    }`}
+                >
+                    {trimmed}
+                </span>
+            );
+        });
     };
 
     if (loading) {
@@ -147,7 +271,11 @@ const ContentList = ({searchQuery} : Search) => {
             {filteredThesis.map((item) => (
                 <div 
                     key={item.thesisID} 
-                    className="flex flex-col bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border-l-4 border-violet-500"
+                    className={`flex flex-col bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 ${
+                        item.keywordMatch && item.keywordMatch > 0
+                            ? `border-l-4 border-violet-${Math.min(item.keywordMatch * 2, 9)}00`
+                            : 'border-l-4 border-violet-500'
+                    }`}
                 >
                     <div className="flex">
                         {/* Thumbnail Preview */}
@@ -158,7 +286,14 @@ const ContentList = ({searchQuery} : Search) => {
                         {/* Main Content */}
                         <div className="flex-1 px-4">
                             <div className="flex justify-between">
-                                <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1 cursor-pointer hover:text-violet-500" onClick={() => handleThesisClick(item.thesisID)}>{item.title}</h3>
+                                <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1 cursor-pointer hover:text-violet-500" onClick={() => handleThesisClick(item.thesisID)}>
+                                    {item.title}
+                                    {item.keywordMatch && item.keywordMatch > 0 && (
+                                        <span className="ml-2 text-xs bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200 px-2 py-0.5 rounded-full">
+                                            {item.keywordMatch} keyword{item.keywordMatch > 1 ? 's' : ''} match
+                                        </span>
+                                    )}
+                                </h3>
                                 <button 
                                     onClick={() => toggleBookmark(item.thesisID)}
                                     className="focus:outline-none transition-transform hover:scale-110"
@@ -167,21 +302,15 @@ const ContentList = ({searchQuery} : Search) => {
                                    {bookmarks.includes(item.thesisID) ? (
                                     <Star className="w-5 h-5 text-violet-400 fill-violet-400" />
                                     ) : (
-                                    <Star className="w-5 h-5 text-gray-400" /> // Use Star here too
+                                    <Star className="w-5 h-5 text-gray-400" />
                                     )}
-
-
                                 </button>
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                                 By <span className="font-medium">{item.authorName}</span> • Published {item.publicationYear}
                             </p>
                             <div className="flex gap-2 mb-2 flex-wrap">
-                                {item.keywords.split(',').map((keyword, idx) => (
-                                    <span key={idx} className="bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200 text-xs px-2 py-1 rounded-full">
-                                        {keyword.trim()}
-                                    </span>
-                                ))}
+                                {highlightMatchingKeywords(item.keywords)}
                             </div>
                             
                             {/* Stats Row */}
@@ -220,8 +349,8 @@ const ContentList = ({searchQuery} : Search) => {
                         )}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                       {/* Action Buttons */}
+                       <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
                         <div className="flex items-center gap-2">
                             <button className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm">
                                 <ThumbsUp size={16} />
@@ -236,7 +365,7 @@ const ContentList = ({searchQuery} : Search) => {
                                 className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm"
                             >
                                 <Share2 size={16} />
-                                <span>Share</span>
+                                <span>Cite</span>
                             </button>
                         </div>
                         
@@ -245,30 +374,36 @@ const ContentList = ({searchQuery} : Search) => {
                                 <Github size={16} />
                                 <span>Code</span>
                             </button>
-                            <button onClick={() => window.open(item.pdfFileUrl, "_blank")}className="flex items-center gap-1 bg-aqua-100 text-violet-700 rounded-full px-3 py-1 text-sm hover:bg-aqua-200 transition-colors">
-                                <Pencil size={16} />
-                                <span>View</span>
+                            <button 
+                                onClick={() => handleThesisClick(item.thesisID)}
+                                className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm"
+                            >
+                                <BookOpen size={16} />
+                                <span>Read</span>
                             </button>
                         </div>
                     </div>
                 </div>
             ))}
             
-            {/* Empty State */}
-            {items.length === 0 && !loading && (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <BookOpen size={48} className="text-violet-300 mb-3" />
-                    <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300">No theses found</h3>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Try adjusting your filters or check back later</p>
+            {filteredThesis.length === 0 && (
+                <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md text-center">
+                    <Github size={48} className="mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-800 dark:text-white mb-2">No results found</h3>
+                    <p className="text-gray-600 dark:text-gray-300">
+                        Try adjusting your search or filter criteria to find more theses.
+                    </p>
                 </div>
             )}
 
             {/* Citation Modal */}
-            <CitationModal 
-                thesis={selectedThesis}
-                isOpen={isCitationModalOpen}
-                onClose={() => setIsCitationModalOpen(false)}
-            />
+            {selectedThesis && (
+                <CitationModal
+                    thesis={selectedThesis}
+                    isOpen={isCitationModalOpen}
+                    onClose={() => setIsCitationModalOpen(false)}
+                />
+            )}
         </div>
     );
 };

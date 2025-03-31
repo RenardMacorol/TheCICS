@@ -94,37 +94,46 @@ const BookmarkList = ({ searchQuery }: Search) => {
     const toggleBookmark = async (thesisID: string) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
-      
-        // Use the filter method to find the thesis in the bookmarked list
-        const isBookmarked = bookmarkedTheses.some(b => b.thesisID === thesisID);
-      
-        if (isBookmarked) {
-          // Remove bookmark
-          const { error } = await supabase
+    
+        // Check if the bookmark already exists
+        const { data: existingBookmark, error: fetchError } = await supabase
             .from("UserBookmarks")
-            .delete()
-            .match({ userID: user.id, thesisID });
-      
-          if (!error) {
-            // Instead of just updating the state, trigger a refresh to get the latest data
-            setRefreshTrigger(prev => prev + 1);
-          } else {
-            console.error("Error removing bookmark:", error);
-          }
-        } else {
-          // Add bookmark
-          const { error } = await supabase
-            .from("UserBookmarks")
-            .insert([{ userID: user.id, thesisID }]);
-      
-          if (!error) {
-            // Instead of just updating the state, trigger a refresh to get the latest data
-            setRefreshTrigger(prev => prev + 1);
-          } else {
-            console.error("Error adding bookmark:", error);
-          }
+            .select("thesisID")
+            .eq("userID", user.id)
+            .eq("thesisID", thesisID)
+            .single(); // Expect only one record
+    
+        if (fetchError && fetchError.code !== "PGRST116") { // Ignore 'no rows found' error
+            console.error("Error checking bookmark:", fetchError);
+            return;
         }
-    };      
+    
+        if (existingBookmark) {
+            // Bookmark exists, remove it
+            const { error: deleteError } = await supabase
+                .from("UserBookmarks")
+                .delete()
+                .match({ userID: user.id, thesisID });
+    
+            if (!deleteError) {
+                setRefreshTrigger(prev => prev + 1);
+            } else {
+                console.error("Error removing bookmark:", deleteError);
+            }
+        } else {
+            // Bookmark doesn't exist, insert it
+            const { error: insertError } = await supabase
+                .from("UserBookmarks")
+                .insert([{ userID: user.id, thesisID }]);
+    
+            if (!insertError) {
+                setRefreshTrigger(prev => prev + 1);
+            } else {
+                console.error("Error adding bookmark:", insertError);
+            }
+        }
+    };
+          
     
 
     if (loading) {
@@ -162,7 +171,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                         className="focus:outline-none transition-transform hover:scale-110"
                                         aria-label="Remove bookmark"
                                     >
-                                        <Star className="w-5 h-5 text-aqua-400 fill-aqua-400" />
+                                        <Star className="w-5 h-5 text-cyan-400 fill-cyan-400" />
                                     </button>
                                     <button
                                         onClick={() => alert(`Clicked on ${item.title}`)}
@@ -243,7 +252,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                 </button>
                                 <button 
                                     onClick={() => window.open(item.pdfFileUrl, "_blank")}
-                                    className="flex items-center gap-1 bg-aqua-100 text-aqua-700 rounded-full px-3 py-1 text-sm hover:bg-aqua-200 transition-colors"
+                                    className="flex items-center gap-1 bg-cyan-100 text-cyan-700 rounded-full px-3 py-1 text-sm hover:bg-cyan-200 transition-colors"
                                 >
                                     <Pencil size={16} />
                                     <span>View</span>
