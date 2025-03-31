@@ -7,7 +7,6 @@ import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2 } from 'lu
 
 
 import CitationModal from "./CitationModal";
-import Thesis from "../../service/Table/Thesis";
 
 
 type Thesis = {
@@ -204,19 +203,12 @@ const ContentList = ({ searchQuery, filters }: ContentListProps) => {
             await supabase
 
                 .from("UserBookmarks")
-                .insert([{ userID, thesisID }]);
+                .insert([{ userID: user.id, thesisID }]);
     
-            if (insertError) {
-                console.error("Error adding bookmark:", insertError);
-                return;
-            }
     
             console.log(`Bookmark for thesisID: ${thesisID} added successfully.`);
             setBookmarks(prev => [...prev, thesisID]); 
-        } else {
-            console.warn("Bookmark already exists, skipping insert.");
-        }
-    };
+        }     };
     
     const handleShareClick = (thesis: Thesis) => {
         setSelectedThesis(thesis);
