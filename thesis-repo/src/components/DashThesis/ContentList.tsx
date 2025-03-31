@@ -1,24 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../api/supabase";
-
 import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil, Search } from 'lucide-react'; //temporarilly removed Download and View
 import CitationModal from "./CitationModal";
+import Thesis from "../../service/Table/Thesis";
 
-type Thesis = {
-    thesisID: string;
-    authorID: number;
-    title: string;
-    abstract: string;
-    publicationYear: number;
-    keywords: string;
-    pdfFileUrl: string;
-    status: string;
-    authorName?: string;
-    views?: number;
-    likes?: number;
-    comments?: number;
-}
 
 
 interface Search{
@@ -65,23 +51,27 @@ const ContentList = ({searchQuery} : Search) => {
         };
     
         const fetchBookmarks = async () => {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            const { data: userData, error: userError } = await supabase.auth.getUser();
             
-            if (user && !userError) {
-                const { data, error } = await supabase
-                    .from("UserBookmarks")
-                    .select("thesisID") // Ensure correct field name
-                    .eq('userID', user.id);
-        
-                if (!error && data) {
-                    setBookmarks(data.map(item => item.thesisID)); // Check if this is correct
-                } else {
-                    setBookmarks([]);
-                }
-            } else {
-                setBookmarks([]);
+            if (userError || !userData.user) {
+                console.error("Error fetching user:", userError);
+                return;
             }
+        
+            const userID = userData.user.id;
+            const { data, error } = await supabase
+                .from("UserBookmarks")
+                .select("thesisID") 
+                .eq("userID", userID);
+        
+            if (error) {
+                console.error("Error fetching bookmarks:", error);
+                return;
+            }
+        
+            setBookmarks(data.map(item => item.thesisID)); // Ensure correct state update
         };
+        
         
     
         fetchTheses();
@@ -114,30 +104,61 @@ const ContentList = ({searchQuery} : Search) => {
       };
       
 
-    const toggleBookmark = async (thesisID: string) => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
+      const toggleBookmark = async (thesisID: string) => {
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData.user) {
+            console.error("Error fetching user:", userError);
+            return;
+        }
+    
+        const userID = userData.user.id;
         const isBookmarked = bookmarks.includes(thesisID);
-        
+    
         if (isBookmarked) {
-            // Remove bookmark
-            await supabase
+            // DELETE existing bookmark
+            const { error: deleteError } = await supabase
                 .from("UserBookmarks")
                 .delete()
-                .match({ userID: user.id, thesisID });
-            
-            setBookmarks(bookmarks.filter(id => id !== thesisID));
-        } else {
-            // Add bookmark
-            await supabase
+                .match({ userID, thesisID });
+    
+            if (deleteError) {
+                console.error("Error removing bookmark:", deleteError);
+                return;
+            }
+    
+            console.log(`Bookmark for thesisID: ${thesisID} deleted successfully.`);
+            setBookmarks(prev => prev.filter(id => id !== thesisID)); // Update local state
+            return; // Exit function to prevent unintended insert
+        }
+    
+        // **Double-check if it was actually deleted before inserting again**
+        const { data: existingBookmarks, error: fetchError } = await supabase
+            .from("UserBookmarks")
+            .select("thesisID")
+            .eq("userID", userID);
+    
+        if (fetchError) {
+            console.error("Error checking existing bookmark:", fetchError);
+            return;
+        }
+    
+        if (!existingBookmarks.some(bookmark => bookmark.thesisID === thesisID)) {
+            const { error: insertError } = await supabase
                 .from("UserBookmarks")
-                .insert({ userID: user.id, thesisID });
-            
-            setBookmarks([...bookmarks, thesisID]);
+                .insert([{ userID, thesisID }]);
+    
+            if (insertError) {
+                console.error("Error adding bookmark:", insertError);
+                return;
+            }
+    
+            console.log(`Bookmark for thesisID: ${thesisID} added successfully.`);
+            setBookmarks(prev => [...prev, thesisID]); 
+        } else {
+            console.warn("Bookmark already exists, skipping insert.");
         }
     };
-
+    
     const handleShareClick = (thesis: Thesis) => {
         setSelectedThesis(thesis);
         setIsCitationModalOpen(true);
