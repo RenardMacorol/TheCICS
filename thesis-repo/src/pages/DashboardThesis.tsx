@@ -55,17 +55,24 @@ const Dashboard = () => {
     fetchUser();
   }, [navigate]);
 
-
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
   };
 
   return (
     <div className="bg-gray-100 min-h-screen text-white">
-      <DashNavTop setSearchQuery={setSearchQuery} />
-      <FilterButton onFilterChange={handleFilterChange} />
-      <ContentList searchQuery={searchQuery} filters={filters} />
-    </div>
+    <DashNavTop setSearchQuery={setSearchQuery}/>
+    {restrict ? 
+    <p className="flex justify-center items-center font-bold text-5xl text-blue-500">You Are Restricted to this page Please Contact Support -Wonka</p> 
+    :
+    (
+      <div>
+    <FilterButton onFilterChange={handleFilterChange}/>
+    <ContentList searchQuery={searchQuery} filters={filters}/>
+      </div>
+    )
+    }
+  </div>
   );
 };
 
