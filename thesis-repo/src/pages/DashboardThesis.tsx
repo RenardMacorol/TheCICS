@@ -5,15 +5,19 @@ import { User } from "@supabase/supabase-js";
 import ContentList from "../components/DashThesis/ContentList";
 import DashNavTop from '../components/DashThesis/DashNavTop';
 import FilterButton from "../components/DashThesis/FilterButton";
+import restrictChecker from "../service/UserHandler/RestrictChecker";
 interface FilterState {
   sort: string;
   year: string;
   keywords: string[];
 }
 
+
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [, setUser] = useState<User | null>(null);
+  const [, setUser] = useState<User |null>(null);
+  const [restrict, setRestrict] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({
     sort: 'newest',
@@ -43,12 +47,14 @@ const Dashboard = () => {
       });
 
       if (insertError) console.error("Error inserting user:", insertError);
+      setRestrict(await restrictChecker(user.id))
 
       setUser(user);
     };
 
     fetchUser();
   }, [navigate]);
+
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
@@ -62,6 +68,7 @@ const Dashboard = () => {
     </div>
   );
 };
+
 
 export default Dashboard;
 

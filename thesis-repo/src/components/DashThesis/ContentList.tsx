@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../api/supabase";
 
+
 import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2 } from 'lucide-react';
+
+
 import CitationModal from "./CitationModal";
+import Thesis from "../../service/Table/Thesis";
+
 
 type Thesis = {
     thesisID: string;
@@ -20,6 +25,8 @@ type Thesis = {
     comments?: number;
     keywordMatch?: number;
 }
+
+
 
 interface FilterState {
     sort: string;
@@ -73,24 +80,28 @@ const ContentList = ({ searchQuery, filters }: ContentListProps) => {
         };
     
         const fetchBookmarks = async () => {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            const { data: userData, error: userError } = await supabase.auth.getUser();
             
-            if (user && !userError) {
-                const { data, error } = await supabase
-                    .from("UserBookmarks")
-                    .select("thesisID") // Ensure correct field name
-                    .eq('userID', user.id);
-        
-                if (!error && data) {
-                    setBookmarks(data.map(item => item.thesisID)); // Check if this is correct
-                } else {
-                    setBookmarks([]);
-                }
-            } else {
-                setBookmarks([]);
+            if (userError || !userData.user) {
+                console.error("Error fetching user:", userError);
+                return;
             }
+        
+            const userID = userData.user.id;
+            const { data, error } = await supabase
+                .from("UserBookmarks")
+                .select("thesisID") 
+                .eq("userID", userID);
+        
+            if (error) {
+                console.error("Error fetching bookmarks:", error);
+                return;
+            }
+        
+            setBookmarks(data.map(item => item.thesisID)); // Ensure correct state update
         };
         
+
         fetchTheses();
         fetchBookmarks();
     }, []);
@@ -171,13 +182,16 @@ const ContentList = ({ searchQuery, filters }: ContentListProps) => {
         navigate(`/thesis/${thesisID}`); // Navigate to the thesis details page
     };
       
+
     const toggleBookmark = async (thesisID: string) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
+
         const isBookmarked = bookmarks.includes(thesisID);
-        
+    
         if (isBookmarked) {
+
             // Remove bookmark (Juls)
             await supabase
                 .from("UserBookmarks")
@@ -188,13 +202,22 @@ const ContentList = ({ searchQuery, filters }: ContentListProps) => {
         } else {
             // Add bookmark (Juls)
             await supabase
+
                 .from("UserBookmarks")
-                .insert({ userID: user.id, thesisID });
-            
-            setBookmarks([...bookmarks, thesisID]);
+                .insert([{ userID, thesisID }]);
+    
+            if (insertError) {
+                console.error("Error adding bookmark:", insertError);
+                return;
+            }
+    
+            console.log(`Bookmark for thesisID: ${thesisID} added successfully.`);
+            setBookmarks(prev => [...prev, thesisID]); 
+        } else {
+            console.warn("Bookmark already exists, skipping insert.");
         }
     };
-
+    
     const handleShareClick = (thesis: Thesis) => {
         setSelectedThesis(thesis);
         setIsCitationModalOpen(true);
