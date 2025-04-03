@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../api/supabase";
-import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil } from 'lucide-react';
+import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2 } from 'lucide-react';
 import Thesis from "../../service/Table/Thesis";
 
 
@@ -169,16 +169,9 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                     <button
                                         onClick={() => toggleBookmark(item.thesisID)}
                                         className="focus:outline-none transition-transform hover:scale-110"
-                                        aria-label="Remove bookmark"
+                                        aria-label="Toggle bookmark"
                                     >
                                         <Star className="w-5 h-5 text-cyan-400 fill-cyan-400" />
-                                    </button>
-                                    <button
-                                        onClick={() => alert(`Clicked on ${item.title}`)}
-                                        className="ml-2 bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-sm hover:bg-blue-200 transition-colors"
-                                        aria-label="Click action"
-                                    >
-                                        <span>Click</span>
                                     </button>
                                 </div>
                                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
@@ -209,7 +202,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                 </div>
                             </div>
                         </div>
-
+    
                         {/* Abstract Section - Expandable */}
                         <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
                             <button 
@@ -227,7 +220,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                 </div>
                             )}
                         </div>
-
+    
                         {/* Action Buttons */}
                         <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
                             <div className="flex items-center gap-2">
@@ -254,8 +247,8 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                     onClick={() => window.open(item.pdfFileUrl, "_blank")}
                                     className="flex items-center gap-1 bg-cyan-100 text-cyan-700 rounded-full px-3 py-1 text-sm hover:bg-cyan-200 transition-colors"
                                 >
-                                    <Pencil size={16} />
-                                    <span>View</span>
+                                    <BookOpen size={16} />
+                                    <span>Read</span>
                                 </button>
                             </div>
                         </div>
@@ -272,6 +265,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
             )}
         </div>
     );
+    
 };
 
 export default BookmarkList;
