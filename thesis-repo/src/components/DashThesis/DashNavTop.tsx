@@ -1,8 +1,8 @@
 import { Bell, CircleHelp, LogOut, Search, Settings, MoonStar, User, BookMarked, Bookmark, Lightbulb, ChevronLeft } from "lucide-react"
 import { useState, useEffect } from "react";
-import Logout from "../../service/LogInService/Logout";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "../../api/supabase";
+import Logout from "../../service/LogInService/UserManagement/Logout";
 
 
 type Notification = {
