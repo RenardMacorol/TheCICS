@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Dashboard from './pages/DashboardThesis';
 import LandingPage from './pages/LandingPage';
 import SignInPage from './pages/SignInPage';
-import SignUpPage from './pages/SignUpPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import BookmarkedTheses from './pages/BookmarkedTheses';
 import ThesisDetails from './pages/ThesisDetails';
@@ -63,7 +62,6 @@ const App = () => {
         />
         
         <Route path='/SignInPage' element={<SignInPage />} />
-        <Route path='/SignUpPage' element={<SignUpPage />} />
         <Route path='/admin' element={<AdminDashboard />} />
         <Route path="/bookmarked" element={<BookmarkedTheses />} />
         <Route path="/thesis/:thesisID" element={<ThesisDetails />} />

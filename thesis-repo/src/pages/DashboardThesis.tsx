@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from '../api/supabase';
 import { User } from "@supabase/supabase-js";
 import ContentList from "../components/DashThesis/ContentList";
 import DashNavTop from '../components/DashThesis/DashNavTop';
 import FilterButton from "../components/DashThesis/FilterButton";
 import restrictChecker from "../service/UserHandler/RestrictChecker";
+import ValidUser from '../service/LogInService/UserManagement/ValidUser';
+import NewUser from "../service/LogInService/UserManagement/NewUser";
+import InsertNewUser from "../service/LogInService/UserManagement/InsertNewUser";
 interface FilterState {
   sort: string;
   year: string;
@@ -14,7 +16,7 @@ interface FilterState {
 
 
 const Dashboard = () => {
-  const navigate = useNavigate();
+  const [userScannned, setUserScanned] = useState(false);
   const [, setUser] = useState<User |null>(null);
   const [restrict, setRestrict] = useState(false);
 
@@ -26,34 +28,27 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-
-      if (error || !user || !user.email?.endsWith("@neu.edu.ph")) {
-        navigate("/", { state: { errorMessage: "PLEASE LOGIN USING YOUR INSTITUTIONAL EMAIL." } });
-        return;
-      }
-
-      const fullname = user.user_metadata?.full_name || "User";
-
-      const { error: insertError } = await supabase.from("Users").insert({
-        userID: user.id,
-        name: fullname,
-        email: user.email,
-        role: "Student",
-        googleAuthID: user.id,
-        profilePicture: user.user_metadata?.avatar_url,
-        dateRegistered: new Date().toISOString()
-      });
-
-      if (insertError) console.error("Error inserting user:", insertError);
+    const handleUser = async () =>{
+    const {data: {user}} = await supabase.auth.getUser();
+      const validUser = new ValidUser();
+      if(user && await validUser.isValidUser(user)){
+        const newUserCheck = new NewUser();
+        if(await newUserCheck.isNewUser(user)){
+          const newUser = new InsertNewUser();
+          newUser.insertNewUser(user)
+        }
       setRestrict(await restrictChecker(user.id))
-
       setUser(user);
-    };
+      }
+ 
 
-    fetchUser();
-  }, [navigate]);
+    }
+    if(!userScannned){
+    handleUser();
+    setUserScanned(true)
+    }
+
+  }, [userScannned]);
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
@@ -79,11 +74,3 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-{/*
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-101">
-        <div className="bg-white shadow-lg rounded-lg p-7 w-96 text-center">
-        <h0 className="text-2xl font-semibold mb-4">Welcome to the Dashboard, {user?.user_metadata?.full_name} </h1>
-        <LogoutButton/>
-        </div>
-      </div>
-    */}
