@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Copy, X, Check, Link, ChevronDown } from 'lucide-react';
-import Thesis from "../../service/Table/Thesis";
+import Thesis from "../../service/Types/Thesis";
 
 
 

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../../api/supabase";
+import { supabase } from "../../service/supabase";
 import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2 } from 'lucide-react';
 import CitationModal from "./CitationModal";
-import Thesis from "../../service/Table/Thesis";
-import { FetchThesis } from '../../service/ContentManagement/FetchThesis';
-import { FetchBookmark } from '../../service/ContentManagement/FetchBookmark';
+import Thesis from "../../service/Types/Thesis";
+import { FetchThesis } from "../../service/contentManagement/FetchThesis";
+import { FetchBookmark } from "../../service/contentManagement/FetchBookmark";
 interface FilterState {
     sort: string;
     year: string;

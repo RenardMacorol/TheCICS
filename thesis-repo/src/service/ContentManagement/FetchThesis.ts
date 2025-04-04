@@ -1,6 +1,6 @@
-import { supabase } from "../../api/supabase";
-import { Fetchable } from "../../Interface/Fetchable";
-import Thesis from '../Table/Thesis';
+import { supabase } from "../supabase";
+import { Fetchable } from "../Types/Fetchable";
+import Thesis from '../Types/Thesis';
 
 export class FetchThesis implements Fetchable<Thesis>{
     private _thesis!: Thesis[];

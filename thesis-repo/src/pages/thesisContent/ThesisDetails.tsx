@@ -1,8 +1,8 @@
   import { useEffect, useState } from "react";
   import { useParams } from "react-router-dom";
-  import { supabase } from "../api/supabase";
-  import DashNavTop from '../components/DashThesis/DashNavTop';
-  import FilterButton from "../components/DashThesis/FilterButton";
+  import { supabase } from "../../service/supabase";
+  import DashNavTop from '../../components/dashboard/DashNavTop';
+  import FilterButton from "../../components/dashboard/FilterButton";
 
   type Author = {
     firstName: string;

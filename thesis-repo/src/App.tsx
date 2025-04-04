@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import { supabase } from './api/supabase';
+import { supabase } from './service/supabase';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Dashboard from './pages/DashboardThesis';
+import Dashboard from './pages/dashboard/DashboardThesis';
 import LandingPage from './pages/LandingPage';
-import SignInPage from './pages/SignInPage';
+import SignInPage from './pages/userAuth/SignIn';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import BookmarkedTheses from './pages/BookmarkedTheses';
-import ThesisDetails from './pages/ThesisDetails';
+import ThesisDetails from './pages/thesisContent/ThesisDetails';
 
 const App = () => {
   const [user, setUser] = useState<any>(null);

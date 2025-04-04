@@ -1,7 +1,7 @@
 import { Bell, CircleHelp, LogOut, Search, Settings, MoonStar, User, BookMarked, Bookmark, Lightbulb, ChevronLeft } from "lucide-react"
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import { supabase } from "../../api/supabase";
+import { supabase } from "../../service/supabase";
 import Logout from "../../service/LogInService/UserManagement/Logout";
 
 

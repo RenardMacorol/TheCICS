@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom"; 
-import SignInButton from "../components/SignInButton";
-import { supabase } from "../api/supabase";
+import SignInButton from "../../components/userAuth/SignInButton";
+import { supabase } from "../../service/supabase";
 
 const SignInPage = () => {
   const [isLoaded, setIsLoaded] = useState(false);

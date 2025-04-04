@@ -1,5 +1,5 @@
 import { User } from "@supabase/supabase-js";
-import { supabase } from "../../../api/supabase";
+import { supabase } from "../../supabase";
 
 class InsertNewUser{
     async insertNewUser(user : User){

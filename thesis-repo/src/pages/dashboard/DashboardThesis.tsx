@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { supabase } from '../api/supabase';
+import { supabase } from '../../service/supabase';
 import { User } from "@supabase/supabase-js";
-import ContentList from "../components/DashThesis/ContentList";
-import DashNavTop from '../components/DashThesis/DashNavTop';
-import FilterButton from "../components/DashThesis/FilterButton";
-import restrictChecker from "../service/UserHandler/RestrictChecker";
-import ValidUser from '../service/LogInService/UserManagement/ValidUser';
-import NewUser from "../service/LogInService/UserManagement/NewUser";
-import InsertNewUser from "../service/LogInService/UserManagement/InsertNewUser";
+import ContentList from "../../components/dashboard/ContentList";
+import DashNavTop from '../../components/dashboard/DashNavTop';
+import FilterButton from "../../components/dashboard/FilterButton";
+import restrictChecker from "../../service/UserHandler/RestrictChecker";
+import ValidUser from '../../service/UserHandler/ValidUser';
+import NewUser from "../../service/UserHandler/NewUser";
+import InsertNewUser from "../../service/UserHandler/InsertNewUser";
 interface FilterState {
   sort: string;
   year: string;

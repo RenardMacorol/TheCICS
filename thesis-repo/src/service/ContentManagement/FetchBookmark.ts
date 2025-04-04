@@ -1,5 +1,5 @@
-import { supabase } from "../../api/supabase";
-import { Fetchable } from "../../Interface/Fetchable";
+import { supabase } from "../supabase";
+import { Fetchable } from "../Types/Fetchable";
 
 export class FetchBookmark implements Fetchable<string>{
     private _bookmarks! :string[]

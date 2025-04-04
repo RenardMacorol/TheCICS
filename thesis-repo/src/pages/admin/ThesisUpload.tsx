@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from '../../api/supabase';
+import { supabase } from '../../service/supabase';
 import { Trash2, Upload, FileText, UserPlus } from 'lucide-react';
 
 interface Authors {

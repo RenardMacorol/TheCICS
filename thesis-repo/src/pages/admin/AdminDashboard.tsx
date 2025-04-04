@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../api/supabase";
+import { supabase } from "../../service/supabase";
 import { User } from "lucide-react";
 import ThesisUpload from './ThesisUpload';
 import { useNavigate } from "react-router-dom";
-import Users from "../../service/Table/User";
-import AdminNavTop from "../../components/DashThesis/AdminNavTop";
+import Users from "../../service/Types/User";
+import AdminNavTop from "../../components/dashboard/AdminNavTop";
 
 interface Thesis {
   thesisID: number;
