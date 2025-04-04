@@ -5,10 +5,10 @@ import ThesisUpload from './ThesisUpload';
 import { useNavigate } from "react-router-dom";
 import Users from "../../service/Types/User";
 import AdminNavTop from "../../components/dashboard/AdminNavTop";
-import { FetchThesisAll } from "../../service/contentManagement/FetchThesisAll";
+import { FetchThesisAll } from "../../service/ContentManagement/FetchThesisAll";
 import Thesis from "../../service/Types/Thesis";
-import { FetchUserAll } from "../../service/contentManagement/FetchUserAll";
-
+import { FetchUserAll } from "../../service/ContentManagement/FetchUserAll";
+import { UserManagementFacade } from "../../service/Facade/UserManagementFacade";
 
 
 const AdminDashboard = () => {
@@ -21,7 +21,7 @@ const AdminDashboard = () => {
   const [loadingTheses, setLoadingTheses] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
-  //const userFacade = new UserFacade();
+  const userFacade = new UserManagementFacade();
   
   useEffect(() => {
     fetchData()
@@ -42,9 +42,6 @@ const AdminDashboard = () => {
 
   }
 
-  
-
-   
 
   const handleCreateUser = async () => {
     const { error } = await supabase.from("Users").insert([
@@ -66,67 +63,27 @@ const AdminDashboard = () => {
   };
   
 
-  const handleRestrictUser = async (userID: string) => {
-    //This should be restrict refactor soon
-    console.log("Restricting", userID);
-  
-    console.log("Attempting to update user:", editingUser);
-  
-    const { error } = await supabase
-      .from("Users")
-      .update({
-        accessType: "Restrict" 
-      })
-      .eq("userID", userID);
-  
-    if (error) {
-      console.error("❌ Error updating user:", error);
-    } else {
-      console.log("✅ User updated successfully");
-      fetchData()
-      setEditingUser(null);
-    } 
-  };
-
-  const handleActivateUser = async (userID: string) => {
-    console.log("🔄 Attempting to activate user:", userID);
-  
-    const { error } = await supabase
-      .from("Users")
-      .update({ accessType: "Active" }) // Ensure this column matches your DB schema
-      .eq("userID", userID);
-  
-    if (error) {
-      console.error("❌ Error activating user:", error);
-    } else {
-      console.log("✅ User activated successfully");
-      fetchData()
+  async function restrictUser(userID: string) {
+    const success = await userFacade.handleRestrictUser(userID);
+    if (success) {
+        alert("User restricted successfully!");
     }
-  };
+}
+
+  async function activateUser(userID: string) {
+    const success = await userFacade.handleActivateUser(userID);
+    if (success) {
+        alert("User activated successfully!");
+    }
+}
   
 
-  const handleUpdateUser = async () => {
-    if (!editingUser) return;
-  
-    console.log("Attempting to update user:", editingUser);
-  
-    const { error } = await supabase
-      .from("Users")
-      .update({
-        name: editingUser.name,
-        email: editingUser.email,
-        role: editingUser.role,
-      })
-      .eq("userID", editingUser.userID);
-  
-    if (error) {
-      console.error("❌ Error updating user:", error);
-    } else {
-      console.log("✅ User updated successfully");
-      fetchData();
-      setEditingUser(null);
-    }
-  };
+async function updateUser(userID: string, newData: Partial<Users>) { 
+  const success = await userFacade.handleUpdateUser(userID, newData);
+  if (success) {
+      alert("User updated successfully!");
+  }
+}
 
   // Approve Thesis
 const handleApproveThesis = async (thesisID: string) => {
@@ -278,7 +235,7 @@ return (
                <td className="border border-gray-300 p-2 flex justify-center items-center gap-2">
                <button
                   className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
-                  onClick={() => handleActivateUser(user.userID)}
+                  onClick={() => activateUser(user.userID)}
                   >
                     Active
                   </button>
@@ -292,7 +249,7 @@ return (
 
                  <button
                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                   onClick={() => handleRestrictUser(user.userID)}
+                   onClick={() => restrictUser(user.userID)}
                  >
                    Restrict
                  </button>
@@ -331,7 +288,16 @@ return (
       </select>
       <button
         className="bg-[#06B8BE] hover:bg-[#05A3A8] text-white p-2 rounded w-full mt-2"
-        onClick={handleUpdateUser}
+        onClick={() => {
+          if (editingUser) {
+            updateUser(editingUser.userID, {
+              name: editingUser.name,
+              email: editingUser.email,
+              role: editingUser.role
+            });
+            setEditingUser(null); //Closing this modal after updating User
+          }
+        }} 
       >
         Save Changes
       </button>
