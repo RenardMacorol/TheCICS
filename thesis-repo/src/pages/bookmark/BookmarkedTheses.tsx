@@ -1,7 +1,7 @@
 import { useState } from "react";
-import DashNavTop from "../components/DashThesis/DashNavTop";
-import FilterButton from "../components/DashThesis/FilterButton";
-import BookmarkList from "../components/DashThesis/BookmarkList";
+import BookmarkList from "../../components/dashboard/BookmarkList";
+import DashNavTop from "../../components/dashboard/DashNavTop";
+import FilterButton from "../../components/dashboard/FilterButton";
 
 const BookmarkedTheses = () => {
   const [searchQuery, setSearchQuery] = useState("");

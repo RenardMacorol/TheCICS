@@ -1,9 +1,9 @@
+import { ThesisBase } from "../Class/ThesisBase";
 import { supabase } from "../supabase";
 import { Fetchable } from "../Types/Fetchable";
 import Thesis from '../Types/Thesis';
 
-export class FetchThesis implements Fetchable<Thesis>{
-    private _thesis!: Thesis[];
+export class FetchThesisActive  extends ThesisBase implements Fetchable<Thesis>{
     async fetch(): Promise<Thesis[]> { // Fetch theses
             const { data: thesesData, error: thesesError } = await supabase
                 .from("Thesis")
@@ -26,8 +26,5 @@ export class FetchThesis implements Fetchable<Thesis>{
 
     }
 
-    get thesis(): Thesis[]{
-        return this._thesis;
-    }
 
 }

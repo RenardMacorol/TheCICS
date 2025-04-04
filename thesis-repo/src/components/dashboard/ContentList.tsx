@@ -4,7 +4,7 @@ import { supabase } from "../../service/supabase";
 import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2 } from 'lucide-react';
 import CitationModal from "./CitationModal";
 import Thesis from "../../service/Types/Thesis";
-import { FetchThesis } from "../../service/contentManagement/FetchThesis";
+import { FetchThesisActive } from "../../service/contentManagement/FetchThesisActive";
 import { FetchBookmark } from "../../service/contentManagement/FetchBookmark";
 interface FilterState {
     sort: string;
@@ -30,7 +30,7 @@ const ContentList = ({ searchQuery, filters }: ContentListProps) => {
     useEffect(() => {
         const fetchContent = async () => {
             setLoading(true);
-            const fetchThesis = new FetchThesis();
+            const fetchThesis = new FetchThesisActive();
             await fetchThesis.fetch()
             const fetchBookmark = new FetchBookmark(); 
             await fetchBookmark.fetch()

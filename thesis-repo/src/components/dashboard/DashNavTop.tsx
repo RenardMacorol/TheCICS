@@ -2,7 +2,7 @@ import { Bell, CircleHelp, LogOut, Search, Settings, MoonStar, User, BookMarked,
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "../../service/supabase";
-import Logout from "../../service/LogInService/UserManagement/Logout";
+import Logout from "../../service/auth/Logout";
 
 
 type Notification = {

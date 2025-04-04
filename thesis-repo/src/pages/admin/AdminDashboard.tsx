@@ -5,17 +5,11 @@ import ThesisUpload from './ThesisUpload';
 import { useNavigate } from "react-router-dom";
 import Users from "../../service/Types/User";
 import AdminNavTop from "../../components/dashboard/AdminNavTop";
+import { FetchThesisAll } from "../../service/contentManagement/FetchThesisAll";
+import Thesis from "../../service/Types/Thesis";
+import { FetchUserAll } from "../../service/contentManagement/FetchUserAll";
 
-interface Thesis {
-  thesisID: number;
-  authorID: number;
-  title: string;
-  abstract: string;
-  publicationYear: string;
-  keywords: string;
-  pdfFileUrl: string;
-  status: "Active" | "Inactive"; // Based on ThesisStatusEnums
-}
+
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -27,34 +21,30 @@ const AdminDashboard = () => {
   const [loadingTheses, setLoadingTheses] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  //const userFacade = new UserFacade();
   
   useEffect(() => {
-    fetchUsers();
-    fetchTheses();
+    fetchData()
   }, []);
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    console.log("Fetching users...");
-    const { data, error } = await supabase.from("Users").select("*");
-  
-    if (error) {
-      console.error("Error fetching users:", error);
-    } else {
-      console.log("✅ Fetched users:", data);
-      setUsers(data || []);
-    }
-    setLoading(false);
-  };
-
-  const fetchTheses = async () => {
+  const fetchData = async () =>{
     setLoadingTheses(true);
-    const { data, error } = await supabase.from("Thesis").select("*");
-    if (error) console.error("Error fetching theses:", error);
-    else setTheses(data || []);
+    setLoading(true)
+    const fetchThesisAll = new FetchThesisAll();
+    await fetchThesisAll.fetch()
+    setTheses(fetchThesisAll.thesis )
+
+    const fetchUserAll = new FetchUserAll();
+    await fetchUserAll.fetch()
+    setUsers(fetchUserAll.users)
     setLoadingTheses(false);
-  };
+    setLoading(false)
+
+  }
+
   
+
+   
 
   const handleCreateUser = async () => {
     const { error } = await supabase.from("Users").insert([
@@ -70,7 +60,7 @@ const AdminDashboard = () => {
     if (error) {
       console.error("Error adding user:", error);
     } else {
-      fetchUsers();
+      fetchData()
       setNewUser({ name: "", email: "", role: "Student" });
     }
   };
@@ -93,7 +83,7 @@ const AdminDashboard = () => {
       console.error("❌ Error updating user:", error);
     } else {
       console.log("✅ User updated successfully");
-      fetchUsers();
+      fetchData()
       setEditingUser(null);
     } 
   };
@@ -110,7 +100,7 @@ const AdminDashboard = () => {
       console.error("❌ Error activating user:", error);
     } else {
       console.log("✅ User activated successfully");
-      fetchUsers(); // Refresh user list
+      fetchData()
     }
   };
   
@@ -133,13 +123,13 @@ const AdminDashboard = () => {
       console.error("❌ Error updating user:", error);
     } else {
       console.log("✅ User updated successfully");
-      fetchUsers();
+      fetchData();
       setEditingUser(null);
     }
   };
 
   // Approve Thesis
-const handleApproveThesis = async (thesisID: number) => {
+const handleApproveThesis = async (thesisID: string) => {
   console.log("🔄 Attempting to approve thesis with ID:", thesisID);
   const { data, error } = await supabase
     .from("Thesis")
@@ -158,7 +148,7 @@ const handleApproveThesis = async (thesisID: number) => {
 };
 
 // Restrict Thesis
-const handleRestrictThesis = async (thesisID: number) => {
+const handleRestrictThesis = async (thesisID: string) => {
   console.log("🔄 Attempting to restrict thesis with ID:", thesisID);
   const { data, error } = await supabase
     .from("Thesis")
@@ -170,6 +160,7 @@ const handleRestrictThesis = async (thesisID: number) => {
     console.error("❌ Error restricting thesis:", error);
   } else {
     console.log("✅ Thesis restricted successfully:", data);
+
     setTheses(theses.map((thesis) =>
       thesis.thesisID === thesisID ? { ...thesis, status: "Inactive" } : thesis
     ));
@@ -177,7 +168,7 @@ const handleRestrictThesis = async (thesisID: number) => {
 };
 
 // Delete Thesis
-const handleDeleteThesis = async (thesisID: number) => {
+const handleDeleteThesis = async (thesisID: string) => {
   console.log("🔄 Attempting to delete thesis with ID:", thesisID);
   const { error } = await supabase
     .from("Thesis")
