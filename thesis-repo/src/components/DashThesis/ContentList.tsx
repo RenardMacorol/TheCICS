@@ -1,38 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../api/supabase";
-
-
 import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2 } from 'lucide-react';
-
-
 import CitationModal from "./CitationModal";
-
-
-type Thesis = {
-    thesisID: string;
-    authorID: number;
-    title: string;
-    abstract: string;
-    publicationYear: number;
-    keywords: string;
-    pdfFileUrl: string;
-    status: string;
-    authorName?: string;
-    views?: number;
-    likes?: number;
-    comments?: number;
-    keywordMatch?: number;
-}
-
-
-
+import Thesis from "../../service/Table/Thesis";
+import { FetchThesis } from '../../service/ContentManagement/FetchThesis';
+import { FetchBookmark } from '../../service/ContentManagement/FetchBookmark';
 interface FilterState {
     sort: string;
     year: string;
     keywords: string[];
 }
-
 interface ContentListProps {
     searchQuery: string;
     filters?: FilterState;
@@ -50,59 +28,21 @@ const ContentList = ({ searchQuery, filters }: ContentListProps) => {
     const navigate = useNavigate();
     
     useEffect(() => {
-        const fetchTheses = async () => {
+        const fetchContent = async () => {
             setLoading(true);
-    
-            // Fetch theses
-            const { data: thesesData, error: thesesError } = await supabase
-                .from("Thesis")
-                .select("*")
-                .eq('status', 'Active');
-    
-            if (thesesError) {
-                console.error("Error fetching theses:", thesesError);
-                setLoading(false);
-                return;
-            }
-    
-            const enhancedData = thesesData.map(thesis => ({
-                ...thesis,
-                authorName: `Author ${thesis.authorID}`,
-                views: Math.floor(Math.random() * 500) + 50,
-                likes: Math.floor(Math.random() * 100) + 5,
-                comments: Math.floor(Math.random() * 20)
-            }));
-    
-            setItems(enhancedData);
-            setFilteredThesis(enhancedData);
+            const fetchThesis = new FetchThesis();
+            await fetchThesis.fetch()
+            const fetchBookmark = new FetchBookmark(); 
+            await fetchBookmark.fetch()
+            setLoading(false);
+
+            setItems(fetchThesis.thesis);
+            setFilteredThesis(fetchThesis.thesis);
+            setBookmarks(fetchBookmark.bookmarks); // Ensure correct state update
             setLoading(false);
         };
-    
-        const fetchBookmarks = async () => {
-            const { data: userData, error: userError } = await supabase.auth.getUser();
-            
-            if (userError || !userData.user) {
-                console.error("Error fetching user:", userError);
-                return;
-            }
-        
-            const userID = userData.user.id;
-            const { data, error } = await supabase
-                .from("UserBookmarks")
-                .select("thesisID") 
-                .eq("userID", userID);
-        
-            if (error) {
-                console.error("Error fetching bookmarks:", error);
-                return;
-            }
-        
-            setBookmarks(data.map(item => item.thesisID)); // Ensure correct state update
-        };
-        
-
-        fetchTheses();
-        fetchBookmarks();
+       
+        fetchContent();
     }, []);
     
     useEffect(() => {
