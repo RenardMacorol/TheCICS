@@ -9,7 +9,7 @@ export class UserManagementFacade {
         this.fetchUserAll = new FetchUserAll();
     }
 
-    // Activate a user by setting their status to "active"
+    // Activate a user by setting their status to "Active"
     async handleActivateUser(userID: string): Promise<boolean> {
         const { error } = await supabase
             .from("Users")
@@ -25,7 +25,7 @@ export class UserManagementFacade {
         return true;
     }
 
-    // Restrict a user by setting their status to "restricted"
+    // Restrict a user by setting their status to "Restricted"
     async handleRestrictUser(userID: string): Promise<boolean> {
         const { error } = await supabase
             .from("Users")
@@ -57,7 +57,7 @@ export class UserManagementFacade {
         return true;
     }
 
-    // Fetch all users (Using FetchUserAll)
+    // Fetch all Users whooo, thank you sa code Master :)
     async fetchUsers(): Promise<User[]> {
         return await this.fetchUserAll.fetch();
     }
