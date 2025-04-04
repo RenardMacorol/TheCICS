@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from '../../service/supabase';
+import { supabase } from '../../service/supabase'; //Gumana na whooo
 
 
 const StudentProfile = () => {
