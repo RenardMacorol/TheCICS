@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, Filter, SlidersHorizontal, Calendar, Tag, TrendingUp, Clock, ThumbsUp, X } from 'lucide-react';
+import { ChevronDown, Filter, SlidersHorizontal, Calendar, Tag, TrendingUp, Clock, ThumbsUp, X, Search} from 'lucide-react';
 import { supabase } from '../../api/supabase';
 
 interface FilterButtonProps {
@@ -15,47 +15,48 @@ const FilterButton: React.FC<FilterButtonProps> = ({ onFilterChange }) => {
     const [allKeywords, setAllKeywords] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showAllKeywords, setShowAllKeywords] = useState(false);
+    const [searchKeyword, setSearchKeyword] = useState<string>('');
     
     const years = ['2025', '2024', '2023', '2022', '2021', '2020'];
     
     useEffect(() => {
         const fetchKeywords = async () => {
             setIsLoading(true);
-            
+
             try {
                 const { data, error } = await supabase
                     .from("Thesis")
                     .select("keywords")
                     .eq('status', 'Active');
-                
+
                 if (error) {
                     console.error("Error fetching keywords:", error);
                     return;
                 }
-                
+
                 let extractedKeywords: string[] = [];
-                data.forEach(thesis => {
+                data.forEach((thesis: { keywords: string | null }) => {
                     if (thesis.keywords) {
                         const thesisKeywords = thesis.keywords
                             .split(',')
                             .map((k: string) => k.trim())
                             .filter((k: string) => k);
-                            
+
                         extractedKeywords = [...extractedKeywords, ...thesisKeywords];
                     }
                 });
-                
+
                 const keywordCount: Record<string, number> = {};
                 extractedKeywords.forEach(keyword => {
                     keywordCount[keyword] = (keywordCount[keyword] || 0) + 1;
                 });
-                
+
                 const sortedKeywords = Object.entries(keywordCount)
                     .sort((a, b) => b[1] - a[1])
                     .map(entry => entry[0]);
-                
+
                 setAllKeywords([...new Set(extractedKeywords)].sort());
-                
+
                 setPopularKeywords(sortedKeywords.slice(0, 12));
             } catch (error) {
                 console.error("Error processing keywords:", error);
@@ -63,7 +64,7 @@ const FilterButton: React.FC<FilterButtonProps> = ({ onFilterChange }) => {
                 setIsLoading(false);
             }
         };
-        
+
         fetchKeywords();
     }, []);
     
@@ -87,8 +88,11 @@ const FilterButton: React.FC<FilterButtonProps> = ({ onFilterChange }) => {
         setSelectedKeywords(newKeywords);
         onFilterChange?.({ sort: activeSort, year: selectedYear, keywords: newKeywords });
     };
+    const displayedKeywords: string[] = showAllKeywords ? allKeywords : popularKeywords;
 
-    const displayedKeywords = showAllKeywords ? allKeywords : popularKeywords;
+    const filteredKeywords: string[] = displayedKeywords.filter(keyword =>
+        keyword.toLowerCase().includes(searchKeyword.toLowerCase())
+    );
 
     return (
         <div className="px-6 py-4">
@@ -242,22 +246,37 @@ const FilterButton: React.FC<FilterButtonProps> = ({ onFilterChange }) => {
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Search Bar */}
+                                    <div className="mb-2 relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Search keywords..."
+                                            className="w-full p-2 border rounded-md text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-violet-500 focus:border-violet-500"
+                                            value={searchKeyword}
+                                            onChange={(e) => setSearchKeyword(e.target.value)}
+                                        />
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <Search size={16} className="text-gray-500" />
+                                        </div>
+                                    </div>
                                     
                                     {/* Available Keywords */}
                                     <div className="max-h-40 overflow-y-auto pr-1 custom-scrollbar">
                                         <div className="flex flex-wrap gap-2">
-                                            {displayedKeywords.length > 0 ? (
-                                                displayedKeywords.map(keyword => (
+                                            {filteredKeywords.length > 0 ? (
+                                                filteredKeywords.map(keyword => (
                                                     <button
                                                         key={keyword}
                                                         className={`px-3 py-1 text-xs rounded-full transition-colors ${
-                                                            selectedKeywords.includes(keyword) 
-                                                                ? 'bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-200' 
+                                                            selectedKeywords.includes(keyword)
+                                                                ? 'bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-200'
                                                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                                         }`}
                                                         onClick={() => toggleKeyword(keyword)}
                                                     >
                                                         {keyword}
+                                                    
                                                     </button>
                                                 ))
                                             ) : (
