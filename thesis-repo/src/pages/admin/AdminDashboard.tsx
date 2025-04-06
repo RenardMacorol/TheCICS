@@ -27,6 +27,7 @@ const AdminDashboard = () => {
   const [loadingTheses, setLoadingTheses] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [editingThesis, setEditingThesis] = useState<Thesis | null>(null);
   
   useEffect(() => {
     fetchUsers();
@@ -57,6 +58,14 @@ const AdminDashboard = () => {
   
 
   const handleCreateUser = async () => {
+    // Email validation to check if the email ends with 'neu.edu.ph'
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@neu\.edu\.ph$/;
+    if (!emailPattern.test(newUser.email)) {
+      alert("Error: Please enter a valid NEU email address (example: user@neu.edu.ph).");
+      return; // Exit the function if email is invalid
+    }
+  
+    // If validations pass, proceed to create the user
     const { error } = await supabase.from("Users").insert([
       {
         name: newUser.name,
@@ -67,6 +76,7 @@ const AdminDashboard = () => {
         dateRegistered: new Date().toISOString(),
       },
     ]);
+    
     if (error) {
       console.error("Error adding user:", error);
     } else {
@@ -176,19 +186,29 @@ const handleRestrictThesis = async (thesisID: number) => {
   }
 };
 
-// Delete Thesis
-const handleDeleteThesis = async (thesisID: number) => {
-  console.log("🔄 Attempting to delete thesis with ID:", thesisID);
+// Open Edit Thesis Modal
+const handleEditThesis = (thesis: Thesis) => {
+  setEditingThesis(thesis);
+};
+
+// Update thesis in the database
+const handleUpdateThesis = async () => {
+  if (!editingThesis) return;
+
   const { error } = await supabase
     .from("Thesis")
-    .delete()
-    .eq("thesisID", thesisID);
+    .update({
+      title: editingThesis.title,
+      abstract: editingThesis.abstract,
+      keywords: editingThesis.keywords,
+    })
+    .eq("thesisID", editingThesis.thesisID);
 
   if (error) {
-    console.error("❌ Error deleting thesis:", error);
+    console.error("❌ Error updating thesis:", error);
   } else {
-    console.log("✅ Thesis deleted successfully");
-    setTheses(theses.filter((thesis) => thesis.thesisID !== thesisID));
+    fetchTheses();  // Refresh thesis list
+    setEditingThesis(null);  // Close modal
   }
 };
 
@@ -223,52 +243,75 @@ const filteredAndSortedTheses = theses
   });
 
   
-return (
-  <div className="pt-24 p-5">
-    {/* Call AdminNavTop here */}
-    <AdminNavTop userName="Admin" />
-    
-    {/* Navbar */}
-    <nav className="w-full fixed top-0 left-0 bg-[#06B8BE] text-white px-6 py-4 flex justify-between items-center shadow-md">
-      {/* Logo & Title Wrapper */}
-      <div className="flex items-center space-x-4">
-        <button onClick={() => navigate("/")} className="w-auto h-10 cursor-pointer">
-          <img src="/TheCICSLogo.png" alt="TheCICS Logo" className="w-auto h-10 object-contain" />
-        </button>
-        <h1 className="text-2xl font-bold">Admin Dashboard - Manage Users</h1>
-      </div>
-      {/* Profile Button */}
-      <div className="relative">
-        <button className="relative p-1.5 hover:bg-[#5CE1E6] rounded-full transition-colors overflow-hidden">
-          <User className="w-5 h-5" />
-        </button>
-      </div>
-    </nav>
-
-    {/* User Management */}
-    <div className="w-full border border-gray-300 rounded-md shadow-md bg-white mt-5">
-      <div className="bg-[#5CE1E6] p-4 border-b border-gray-300 text-left">
-        <h2 className="text-2xl font-semibold text-gray-800 pl-4">User Management</h2>
-      </div>
-
-      {/* Add User Form */}
-      <div className="p-6 flex justify-center border-b border-gray-300">
-        <div className="flex flex-wrap items-center justify-center gap-3 bg-white shadow-md p-4 rounded-md border border-gray-300 w-full max-w-3xl">
-          <input className="border border-gray-400 p-2 rounded-md w-60" type="text" placeholder="Name" value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} />
-          <input className="border border-gray-400 p-2 rounded-md w-60" type="email" placeholder="Email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} />
-          <select className="border border-gray-400 p-2 rounded-md" value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}>
-            <option value="Student">Student</option>
-            <option value="Faculty">Faculty</option>
-            <option value="Admin">Admin</option>
-          </select>
-          <button className="bg-[#5CE1E6] hover:bg-[#06B8BE] text-white font-medium px-4 py-2 rounded-md" onClick={handleCreateUser}>Add User</button>
+  return (
+    <div className="pt-24 p-5">
+      {/* Call AdminNavTop here */}
+      <AdminNavTop userName="Admin" />
+  
+      {/* Navbar */}
+      <nav className="w-full fixed top-0 left-0 bg-[#06B8BE] text-white px-6 py-4 flex justify-between items-center shadow-md">
+        {/* Logo & Title Wrapper */}
+        <div className="flex items-center space-x-4">
+          <button onClick={() => navigate("/")} className="w-auto h-10 cursor-pointer">
+            <img src="/TheCICSLogo.png" alt="TheCICS Logo" className="w-auto h-10 object-contain" />
+          </button>
+          <h1 className="text-2xl font-bold">Admin Dashboard - Manage Users</h1>
         </div>
-      </div>
-
-      {/* User List Table */}
-      {loading ? <p className="text-gray-500 p-4">Loading users...</p> : (
-        <table className="w-full border-collapse border border-gray-300 bg-white text-gray-800 shadow-md mt-0">
-          <thead>
+        {/* Profile Button */}
+        <div className="relative">
+          <button className="relative p-1.5 hover:bg-[#5CE1E6] rounded-full transition-colors overflow-hidden">
+            <User className="w-5 h-5" />
+          </button>
+        </div>
+      </nav>
+  
+      {/* User Management */}
+      <div className="w-full border border-gray-300 rounded-md shadow-md bg-white mt-5">
+        <div className="bg-[#5CE1E6] p-4 border-b border-gray-300 text-left">
+          <h2 className="text-2xl font-semibold text-gray-800 pl-4">User Management</h2>
+        </div>
+  
+        {/* Add User Form */}
+        <div className="p-6 flex justify-center border-b border-gray-300">
+          <div className="flex flex-wrap items-center justify-center gap-3 bg-white shadow-md p-4 rounded-md border border-gray-300 w-full max-w-3xl">
+            <input
+              className="border border-gray-400 p-2 rounded-md w-60"
+              type="text"
+              placeholder="Name"
+              value={newUser.name}
+              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+            />
+            <input
+              className="border border-gray-400 p-2 rounded-md w-60"
+              type="email"
+              placeholder="Email"
+              value={newUser.email}
+              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+            />
+            <select
+              className="border border-gray-400 p-2 rounded-md"
+              value={newUser.role}
+              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+            >
+              <option value="Student">Student</option>
+              <option value="Faculty">Faculty</option>
+              <option value="Admin">Admin</option>
+            </select>
+            <button
+              className="bg-[#5CE1E6] hover:bg-[#06B8BE] text-white font-medium px-4 py-2 rounded-md"
+              onClick={handleCreateUser}
+            >
+              Add User
+            </button>
+          </div>
+        </div>
+  
+        {/* User List Table */}
+        {loading ? (
+          <p className="text-gray-500 p-4">Loading users...</p>
+        ) : (
+          <table className="w-full border-collapse border border-gray-300 bg-white text-gray-800 shadow-md mt-0">
+            <thead>
               <tr className="bg-gray-100">
                 <th className="border border-gray-300 p-2">User ID</th>
                 <th className="border border-gray-300 p-2">Name</th>
@@ -277,173 +320,227 @@ return (
                 <th className="border border-gray-300 p-2">Actions</th>
               </tr>
             </thead>
-          <tbody>
-          {users.map((user) => (
-               <tr key={user.userID} className="border border-gray-300">
-               <td className="border border-gray-300 p-2">{user.userID}</td>
-               <td className="border border-gray-300 p-2">{user.name}</td>
-               <td className="border border-gray-300 p-2">{user.email}</td>
-               <td className="border border-gray-300 p-2">{user.role}</td>
-               <td className="border border-gray-300 p-2 flex justify-center items-center gap-2">
-               <button
-                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
-                  onClick={() => handleActivateUser(user.userID)}
-                  >
-                    Active
-                  </button>
-
-                 <button
-                   className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                   onClick={() => setEditingUser(user)}
-                 >
-                   Edit
-                 </button>
-
-                 <button
-                   className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                   onClick={() => handleRestrictUser(user.userID)}
-                 >
-                   Restrict
-                 </button>
-               </td>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.userID} className="border border-gray-300">
+                  <td className="border border-gray-300 p-2">{user.userID}</td>
+                  <td className="border border-gray-300 p-2">{user.name}</td>
+                  <td className="border border-gray-300 p-2">{user.email}</td>
+                  <td className="border border-gray-300 p-2">{user.role}</td>
+                  <td className="border border-gray-300 p-2 flex justify-center items-center gap-2">
+                    <button
+                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+                      onClick={() => handleActivateUser(user.userID)}
+                    >
+                      Active
+                    </button>
+  
+                    <button
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+                      onClick={() => setEditingUser(user)}
+                    >
+                      Edit
+                    </button>
+  
+                    <button
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                      onClick={() => handleRestrictUser(user.userID)}
+                    >
+                      Restrict
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+  
+      {/* Edit User Section */}
+      {editingUser && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50">
+          <div className="bg-white p-5 rounded-lg shadow-lg w-96">
+            <h2 className="text-2xl font-semibold text-gray-800">Edit User</h2>
+            <input
+              className="border border-gray-300 p-2 m-2 rounded w-full"
+              type="text"
+              value={editingUser.name}
+              onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+            />
+            <input
+              className="border border-gray-300 p-2 m-2 rounded w-full"
+              type="email"
+              value={editingUser.email}
+              onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+            />
+            <select
+              className="border border-gray-300 p-2 m-2 rounded w-full"
+              value={editingUser.role}
+              onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+            >
+              <option value="Student">Student</option>
+              <option value="Faculty">Faculty</option>
+              <option value="Admin">Admin</option>
+            </select>
+            <button
+              className="bg-[#06B8BE] hover:bg-[#05A3A8] text-white p-2 rounded w-full mt-2"
+              onClick={handleUpdateUser}
+            >
+              Save Changes
+            </button>
+            <button
+              className="mt-2 bg-gray-500 hover:bg-gray-600 text-white p-2 rounded w-full"
+              onClick={() => setEditingUser(null)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+  
+      {/* Thesis Management & Upload */}
+      <div className="flex justify-between mt-5">
+        {/* Left: Manage Theses */}
+        <div className="w-1/2 pr-4">
+          {/* Title Outside the Table */}
+          <div className="text-2xl font-semibold text-gray-800 p-4 bg-[#5CE1E6] border border-gray-300 rounded-t-md text-center">
+            Thesis Management
+          </div>
+  
+          {/* Search Input and Status Dropdown */}
+          <div className="flex justify-center items-center space-x-4 p-4 bg-white border-x border-b border-gray-300 rounded-b-md">
+            {/* Search Input */}
+            <input
+              type="text"
+              placeholder="Search by title or ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-3/4 p-2 border border-gray-300 rounded"
+            />
+  
+            {/* Status Dropdown */}
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="p-2 border border-gray-300 rounded"
+            >
+              <option value="All">All</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+  
+          {loadingTheses ? (
+            <p className="text-gray-500 p-4">Loading theses...</p>
+          ) : (
+            <table className="w-full border-collapse border border-gray-300 mt-2 bg-white text-black shadow-md rounded-md">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-2">Thesis ID</th>
+                  <th className="border border-gray-300 p-2">Title</th>
+                  <th className="border border-gray-300 p-2">Status</th>
+                  <th className="border border-gray-300 p-2">Actions</th>
+                </tr>
+              </thead>
+  
+              <tbody>
+                {filteredAndSortedTheses.map((thesis) => (
+                  <tr key={thesis.thesisID} className="border border-gray-300 hover:bg-gray-50">
+                    <td className="border border-gray-300 p-2">{thesis.thesisID}</td>
+                    <td className="border border-gray-300 p-2">{thesis.title}</td>
+                    <td className="border border-gray-300 p-2">{thesis.status}</td>
+                    <td className="border border-gray-300 p-2">
+                      <div className="flex space-x-1">
+                        <button
+                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded m-1"
+                          onClick={() => handleApproveThesis(thesis.thesisID)}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded m-1"
+                          onClick={() => handleRestrictThesis(thesis.thesisID)}
+                        >
+                          Restrict
+                        </button>
+                        <button
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded m-1"
+                          onClick={() => handleEditThesis(thesis)}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-               ))}
-          </tbody>
-        </table>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+  
+        {/* Right: Upload Thesis */}
+        <div className="w-1/2 pl-4">
+          <ThesisUpload />
+        </div>
+      </div>
+  
+      {/* Edit Thesis Modal */}
+      {editingThesis && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black/30 backdrop-blur-md z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-96">
+            <h2 className="text-2xl font-semibold">Edit Thesis</h2>
+            <div className="mt-4">
+              <label className="block text-sm font-medium">Title</label>
+              <input
+                type="text"
+                value={editingThesis.title}
+                onChange={(e) =>
+                  setEditingThesis({ ...editingThesis, title: e.target.value })
+                }
+                className="w-full p-2 border border-gray-300 rounded mt-2"
+              />
+            </div>
+            <div className="mt-4">
+              <label className="block text-sm font-medium">Abstract</label>
+              <textarea
+                value={editingThesis.abstract}
+                onChange={(e) =>
+                  setEditingThesis({ ...editingThesis, abstract: e.target.value })
+                }
+                className="w-full p-2 border border-gray-300 rounded mt-2"
+              />
+            </div>
+            <div className="mt-4">
+              <label className="block text-sm font-medium">Keywords</label>
+              <input
+                type="text"
+                value={editingThesis.keywords}
+                onChange={(e) =>
+                  setEditingThesis({ ...editingThesis, keywords: e.target.value })
+                }
+                className="w-full p-2 border border-gray-300 rounded mt-2"
+              />
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={handleUpdateThesis}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setEditingThesis(null)}
+                className="ml-2 bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
-        {/* Edit User Section */}
-          {editingUser && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50">
-            <div className="bg-white p-5 rounded-lg shadow-lg w-96">
-              <h2 className="text-2xl font-semibold text-gray-800">Edit User</h2>
-      <input
-        className="border border-gray-300 p-2 m-2 rounded w-full"
-        type="text"
-        value={editingUser.name}
-        onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-      />
-      <input
-        className="border border-gray-300 p-2 m-2 rounded w-full"
-        type="email"
-        value={editingUser.email}
-        onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-      />
-      <select
-        className="border border-gray-300 p-2 m-2 rounded w-full"
-        value={editingUser.role}
-        onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-      >
-        <option value="Student">Student</option>
-        <option value="Faculty">Faculty</option>
-        <option value="Admin">Admin</option>
-      </select>
-      <button
-        className="bg-[#06B8BE] hover:bg-[#05A3A8] text-white p-2 rounded w-full mt-2"
-        onClick={handleUpdateUser}
-      >
-        Save Changes
-      </button>
-      <button
-        className="mt-2 bg-gray-500 hover:bg-gray-600 text-white p-2 rounded w-full"
-        onClick={() => setEditingUser(null)}
-      >
-        Cancel
-      </button>
-    </div>
-  </div>
-)}
-            {/* Thesis Management & Upload */}
-            <div className="flex justify-between mt-5">
-              {/* Left: Manage Theses */}
-              <div className="w-1/2 pr-4">
-                {/* Title Outside the Table */}
-                <div className="text-2xl font-semibold text-gray-800 p-4 bg-[#5CE1E6] border border-gray-300 rounded-t-md text-center">
-                  Thesis Management
-                </div>
-
-             
-    {/* Search Input and Status Dropdown */}
-    <div className="flex justify-center items-center space-x-4 p-4 bg-white border-x border-b border-gray-300 rounded-b-md">
-      {/* Search Input */}
-      <input
-        type="text"
-        placeholder="Search by title or ID..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-3/4 p-2 border border-gray-300 rounded"
-      />
-      
-      {/* Status Dropdown */}
-      <select
-        value={filterStatus}
-        onChange={(e) => setFilterStatus(e.target.value)}
-        className="p-2 border border-gray-300 rounded"
-      >
-        <option value="All">All</option>
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-      </select>
-    </div>
-
-    {loadingTheses ? (
-      <p className="text-gray-500 p-4">Loading theses...</p>
-    ) : (
-      <table className="w-full border-collapse border border-gray-300 mt-2 bg-white text-black shadow-md rounded-md">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border border-gray-300 p-2">Thesis ID</th>
-            <th className="border border-gray-300 p-2">Title</th>
-            <th className="border border-gray-300 p-2">Status</th>
-            <th className="border border-gray-300 p-2">Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {filteredAndSortedTheses.map((thesis) => (
-            <tr
-              key={thesis.thesisID}
-              className="border border-gray-300 hover:bg-gray-50"
-            >
-              <td className="border border-gray-300 p-2">{thesis.thesisID}</td>
-              <td className="border border-gray-300 p-2">{thesis.title}</td>
-              <td className="border border-gray-300 p-2">{thesis.status}</td>
-              <td className="border border-gray-300 p-2">
-                <div className="flex space-x-1">
-                  <button
-                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded m-1"
-                    onClick={() => handleApproveThesis(thesis.thesisID)}
-                  >
-                    Approve
-                  </button>
-                  <button
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded m-1"
-                    onClick={() => handleRestrictThesis(thesis.thesisID)}
-                  >
-                    Restrict
-                  </button>
-                  <button
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded m-1"
-                    onClick={() => handleDeleteThesis(thesis.thesisID)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    )}
-</div>
-
-      {/* Right: Upload Thesis */}
-      <div className="w-1/2 pl-4">
-        <ThesisUpload />
-      </div>
-    </div>
-  </div>
-);
+  );
+  
 };
 
 export default AdminDashboard;
