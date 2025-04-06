@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Copy, X, Check, BookOpen, Users } from 'lucide-react'; // removed Link as LinkIcon import muna
+import { Copy, X, Check, BookOpen, Users, Sparkles } from 'lucide-react'; // Added Sparkles icon
 import { supabase } from "../../service/supabase";
 import {
   CitationModalProps,
@@ -23,7 +23,8 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
   const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
   const [citationStats, setCitationStats] = useState<CitationStats>({
     uniqueUserCount: 0,
-    totalCitationCount: 0
+    totalCitationCount: 0,
+    hasUserCited: false // Added this property
   });
   
   // Fetch current user on component mount
@@ -42,9 +43,10 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
   const fetchCitationStats = useCallback(async () => {
     if (!thesis?.thesisID || !isOpen) return;
     
-    const stats = await fetchStats(thesis.thesisID);
+    // Pass the current user ID to check if they've cited before
+    const stats = await fetchStats(thesis.thesisID, currentUser?.id || null);
     setCitationStats(stats);
-  }, [thesis?.thesisID, isOpen]);
+  }, [thesis?.thesisID, isOpen, currentUser?.id]);
   
   useEffect(() => {
     if (thesis?.thesisID && isOpen) {
@@ -52,7 +54,6 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
     }
   }, [thesis?.thesisID, isOpen, fetchCitationStats]);
   
-  // Close on ESC key press
   useEffect(() => {
     const handleEscKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) onClose();
@@ -140,6 +141,16 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
             </span>
           </div>
           
+          {/* User has cited notification - NEW COMPONENT */}
+          {citationStats.hasUserCited && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 animate-fadeIn">
+              <Sparkles size={16} className="text-indigo-500 dark:text-indigo-400" />
+              <p className="text-sm">
+                You've already cited this thesis! Wowowow!
+              </p>
+            </div>
+          )}
+          
           {/* Format Selection Tabs */}
           <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
             {(Object.keys(formatLabels) as CitationFormat[]).map(format => (
@@ -190,6 +201,7 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
             </p>
           </div>
           
+          {/* ‼️‼️Will not add this kasi github nalang siguro 'to? or ewan mag ask nalang latur */}
           {/* Link section */}
           {/* <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center mb-3">

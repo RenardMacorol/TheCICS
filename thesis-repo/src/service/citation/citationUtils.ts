@@ -11,6 +11,7 @@ export type CopyState = {
 export type CitationStats = {
   uniqueUserCount: number;
   totalCitationCount: number;
+  hasUserCited: boolean; // Added this property
 }
 
 export type CitationModalProps = {
@@ -65,10 +66,40 @@ export const getCurrentFormattedDate = (): string => {
   return `${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getDate()}, ${currentDate.getFullYear()}`;
 };
 
+// Check if a specific user has cited this thesis
+export const checkUserCitation = async (
+  thesisID: string,
+  userID: string | null
+): Promise<boolean> => {
+  if (!thesisID || !userID) return false;
+  
+  try {
+    const { data, error } = await supabase
+      .from('ThesisCitationCount')
+      .select('id')
+      .eq('thesisID', thesisID)
+      .eq('userID', userID)
+      .limit(1);
+      
+    if (error) {
+      console.error('Error checking user citation:', error);
+      return false;
+    }
+    
+    return data && data.length > 0;
+  } catch (err) {
+    console.error('Failed to check user citation:', err);
+    return false;
+  }
+};
+
 // Fetch citation statistics
-export const fetchCitationStats = async (thesisID: string): Promise<CitationStats> => {
+export const fetchCitationStats = async (
+  thesisID: string,
+  userID: string | null
+): Promise<CitationStats> => {
   if (!thesisID) {
-    return { uniqueUserCount: 0, totalCitationCount: 0 };
+    return { uniqueUserCount: 0, totalCitationCount: 0, hasUserCited: false };
   }
   
   try {
@@ -80,13 +111,13 @@ export const fetchCitationStats = async (thesisID: string): Promise<CitationStat
     
     if (fetchError) {
       console.error('Error fetching citation data:', fetchError);
-      return { uniqueUserCount: 0, totalCitationCount: 0 };
+      return { uniqueUserCount: 0, totalCitationCount: 0, hasUserCited: false };
     }
     
     // Count total citations (Ano 'to per click ng user wahahhaha)
     const totalCount = allCitations?.length || 0;
     
-    // Count unique users (filter out null userIDs and count unique values)
+    // Count unique users
     const validUserIDs = allCitations
       ?.filter(citation => citation.userID !== null)
       .map(citation => citation.userID) || [];
@@ -94,13 +125,17 @@ export const fetchCitationStats = async (thesisID: string): Promise<CitationStat
     const uniqueUserIDs = [...new Set(validUserIDs)];
     const uniqueCount = uniqueUserIDs.length;
     
+    // Check if current user has cited this thesis
+    const hasUserCited = userID ? uniqueUserIDs.includes(userID) : false;
+    
     return {
       uniqueUserCount: uniqueCount,
-      totalCitationCount: totalCount
+      totalCitationCount: totalCount,
+      hasUserCited
     };
   } catch (err) {
     console.error('Failed to fetch citation statistics:', err);
-    return { uniqueUserCount: 0, totalCitationCount: 0 };
+    return { uniqueUserCount: 0, totalCitationCount: 0, hasUserCited: false };
   }
 };
 
