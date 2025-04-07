@@ -5,10 +5,10 @@ import ThesisUpload from './ThesisUpload';
 import { useNavigate } from "react-router-dom";
 import Users from "../../service/Types/User";
 import AdminNavTop from "../../components/dashboard/AdminNavTop";
-import { FetchThesisAll } from "../../service/ContentManagement/FetchThesisAll";
+import { FetchThesisAll } from "../../service/contentManagement/FetchThesisAll";
 import Thesis from "../../service/Types/Thesis";
-import { FetchUserAll } from "../../service/ContentManagement/FetchUserAll";
 import { UserManagementFacade } from "../../service/Facade/UserManagementFacade";
+import { FetchUserAll } from "../../service/contentManagement/FetchUserAll";
 
 
 const AdminDashboard = () => {
