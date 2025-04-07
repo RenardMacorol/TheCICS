@@ -1,8 +1,8 @@
 
 import { useEffect, useState } from "react";
-import { supabase } from "../../api/supabase";
+import { supabase } from "../../service/supabase";
 import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil } from 'lucide-react';
-import Thesis from "../../service/Table/Thesis";
+import Thesis from "../../service/Types/Thesis";
 
 
 

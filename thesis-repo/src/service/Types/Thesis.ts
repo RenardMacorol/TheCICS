@@ -11,6 +11,7 @@ interface Thesis{
     views?: number;
     likes?: number;
     comments?: number;
+    keywordMatch?: number;
 }
 
 export default Thesis;

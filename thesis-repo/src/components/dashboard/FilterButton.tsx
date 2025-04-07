@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, Filter, SlidersHorizontal, Calendar, Tag, TrendingUp, Clock, ThumbsUp, X } from 'lucide-react';
-import { supabase } from '../../api/supabase';
+import { supabase } from '../../service/supabase';
 
 interface FilterButtonProps {
     onFilterChange?: (filters: { sort: string; year: string; keywords: string[] }) => void;

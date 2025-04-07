@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import { supabase } from './api/supabase';
+import { supabase } from './service/supabase';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Dashboard from './pages/DashboardThesis';
-import LandingPage from './pages/LandingPage';
-import SignInPage from './pages/SignInPage';
-import SignUpPage from './pages/SignUpPage';
+import Dashboard from './pages/dashboard/DashboardThesis';
+import SignInPage from './pages/userAuth/SignIn';
 import AdminDashboard from './pages/admin/AdminDashboard';
-import BookmarkedTheses from './pages/BookmarkedTheses';
-import ThesisDetails from './pages/ThesisDetails';
+import ThesisDetails from './pages/thesisContent/ThesisDetails';
+import BookmarkedTheses from './pages/bookmark/BookmarkedTheses';
+import LandingPage from './pages/landingPage/LandingPage';
 
 const App = () => {
   const [user, setUser] = useState<any>(null);
@@ -63,7 +62,6 @@ const App = () => {
         />
         
         <Route path='/SignInPage' element={<SignInPage />} />
-        <Route path='/SignUpPage' element={<SignUpPage />} />
         <Route path='/admin' element={<AdminDashboard />} />
         <Route path="/bookmarked" element={<BookmarkedTheses />} />
         <Route path="/thesis/:thesisID" element={<ThesisDetails />} />

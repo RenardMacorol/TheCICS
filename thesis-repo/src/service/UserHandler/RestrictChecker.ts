@@ -1,4 +1,4 @@
-import { supabase } from "../../api/supabase"
+import { supabase } from "../supabase"
 
 interface UserAccess{
     accessType: string

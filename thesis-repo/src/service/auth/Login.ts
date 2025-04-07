@@ -1,4 +1,4 @@
-import { supabase } from "../../api/supabase";
+import { supabase } from "../supabase";
 
 const Login = async(setError: (message:string) => void) => {
     const { error } = await supabase.auth.signInWithOAuth({provider: "google"});

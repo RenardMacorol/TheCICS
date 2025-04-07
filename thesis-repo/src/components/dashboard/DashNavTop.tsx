@@ -1,8 +1,8 @@
 import { Bell, CircleHelp, LogOut, Search, Settings, MoonStar, User, BookMarked, Bookmark, Lightbulb, ChevronLeft } from "lucide-react"
 import { useState, useEffect } from "react";
-import Logout from "../../service/LogInService/Logout";
 import { useNavigate } from 'react-router-dom';
-import { supabase } from "../../api/supabase";
+import { supabase } from "../../service/supabase"; 
+import Logout from "../../service/auth/Logout";
 
 
 type Notification = {
@@ -24,6 +24,7 @@ const DashNavTop = ({setSearchQuery}:Search) => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [userName, setUserName] = useState("");
     const [userRole, setUserRole] = useState<string | null>(null);
+    const [profilePicture, setProfilePicture] = useState<string | null>(null);
     
     useEffect(() => {
         const fetchUserData = async () => {
@@ -60,7 +61,26 @@ const DashNavTop = ({setSearchQuery}:Search) => {
         fetchUserData();
     }, []);
 
+    useEffect(() => {
+        const fetchProfilePicture = async () => {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
     
+          const { data, error } = await supabase
+            .from("Users")
+            .select("profilePicture")
+            .eq("userID", user.id)
+            .single();
+    
+          if (!error && data?.profilePicture) {
+            setProfilePicture(data.profilePicture);
+          }
+        };
+    
+        fetchProfilePicture();
+      }, []);
+
+
     const handleLogout = async () => {
         await Logout();
         navigate('/')
@@ -180,25 +200,49 @@ const DashNavTop = ({setSearchQuery}:Search) => {
                         onClick={() => setProfileOpen(!isProfileOpen)}
                         className="relative p-1.5 hover:bg-violet-700 rounded-full transition-colors overflow-hidden"
                     >
-                        <User className="w-5 h-5"/>
+                        {profilePicture ? (
+                            <img
+                                src={profilePicture}
+                                alt="Profile"
+                                className="w-6 h-6 rounded-full object-cover"
+                            />
+                            ) : (
+                            <User className="w-5 h-5" />
+                            )}
+
                     </button>
                     
                     {isProfileOpen && (
                         <div className="absolute right-0 mt-2 bg-white text-gray-800 shadow-lg rounded-md overflow-hidden z-10 w-56">
                             <div className="bg-violet-800 text-white p-4">
                                 <div className="text-center">
-                                    <div className="w-16 h-16 rounded-full bg-violet-700 flex items-center justify-center mx-auto mb-2">
-                                        <User className="w-8 h-8" />
+                                <div className="w-16 h-16 rounded-full bg-violet-700 flex items-center justify-center mx-auto mb-2 overflow-hidden">
+                                    {profilePicture ? (
+                                        <img
+                                        src={profilePicture}
+                                        alt="Profile"
+                                        className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <User className="w-8 h-8 text-white" />
+                                    )}
                                     </div>
+
                                     <p className="font-medium">{userName}</p>
                                     <p className="text-xs text-violet-200">Researcher</p>
                                 </div>
                             </div>
                             <ul className="text-gray-700">
                                 <li className="border-b">
-                                    <button className="p-3 w-full text-left hover:bg-gray-50 flex items-center">
-                                        <User className="mr-2 w-4 h-4"/> Profile
-                                    </button>
+                                <button 
+                                    className="p-3 w-full text-left hover:bg-gray-50 flex items-center"
+                                    onClick={() => {
+                                        navigate('/profile');
+                                        setProfileOpen(false); // This is optional code. 
+                                    }}
+                                >
+                                    <User className="mr-2 w-4 h-4" /> Profile
+                                </button>
                                 </li>
                                 <li className="border-b">
                                     <button className="p-3 w-full text-left hover:bg-gray-50 flex items-center">
