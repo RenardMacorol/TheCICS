@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import Hero from '../../components/landingPage/Hero';
 import NavBarLanding from '../../components/landingPage/NavbarLanding';
+import Hero from '../../components/landingPage/Hero';
 
 
 const LandingPage = () => {  

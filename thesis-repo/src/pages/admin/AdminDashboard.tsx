@@ -5,9 +5,9 @@ import ThesisUpload from './ThesisUpload';
 import { useNavigate } from "react-router-dom";
 import Users from "../../service/Types/User";
 import AdminNavTop from "../../components/dashboard/AdminNavTop";
-import { FetchThesisAll } from "../../service/contentManagement/FetchThesisAll";
 import Thesis from "../../service/Types/Thesis";
-import { UserManagementFacade } from "../../service/Facade/UserManagementFacade";
+import { UserManagementFacade } from "../../service/facade/UserManagementFacade";
+import { FetchThesisAll } from "../../service/contentManagement/FetchThesisAll";
 import { FetchUserAll } from "../../service/contentManagement/FetchUserAll";
 
 

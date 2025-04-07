@@ -1,6 +1,6 @@
+import { FetchUserAll } from '../contentManagement/FetchUserAll';
 import { supabase } from '../supabase';
 import User from '../Types/User';
-import { FetchUserAll } from '../contentManagement/FetchUserAll';
 
 export class UserManagementFacade {
     private fetchUserAll: FetchUserAll;
