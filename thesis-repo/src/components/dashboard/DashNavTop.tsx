@@ -63,17 +63,11 @@ const DashNavTop = ({setSearchQuery}:Search) => {
 
     useEffect(() => {
         const fetchProfilePicture = async () => {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (!user) return;
+          const  data = await supabase.auth.getUser();
+          if (!data) return;
     
-          const { data, error } = await supabase
-            .from("Users")
-            .select("profilePicture")
-            .eq("userID", user.id)
-            .single();
-    
-          if (!error && data?.profilePicture) {
-            setProfilePicture(data.profilePicture);
+        if (data) {
+            setProfilePicture(data.data.user?.user_metadata?.avatar_url);
           }
         };
     
