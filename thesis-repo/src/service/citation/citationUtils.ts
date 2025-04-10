@@ -144,28 +144,22 @@ export const recordCitation = async (
   thesisID: string,
   userID: string | null,
   type: 'citation' | 'link',
-  citationFormat?: CitationFormat
-): Promise<boolean> => {
-  try {
-    const { error: insertError } = await supabase
-      .from('ThesisCitationCount')
-      .insert({
-        thesisID: thesisID,
-        userID: userID || null,
-        citationFormat: type === 'citation' ? citationFormat : null,
-        citationType: type,
-        copiedAt: new Date().toISOString()
-      });
-      
-    if (insertError) {
-      console.error('Error recording citation:', insertError);
-      return false;
-    }
-    
-    console.log(`Citation recorded successfully. Type: ${type}, User: ${userID || 'anonymous'}`);
-    return true;
-  } catch (err) {
-    console.error('Failed to record citation:', err);
-    return false;
-  }
+  format?: CitationFormat,
+  content?: string
+) => {
+  // Record in stats table
+  await supabase.from('citation_stats').insert([{
+    thesis_id: thesisID,
+    user_id: userID,
+    citation_type: type,
+    citation_format: format,
+  }]);
+
+  // Record in history table
+  await supabase.from('citation_history').insert([{
+    thesis_id: thesisID,
+    user_id: userID,
+    type,
+    content,
+  }]);
 };

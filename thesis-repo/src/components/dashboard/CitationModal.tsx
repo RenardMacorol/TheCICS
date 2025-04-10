@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Copy, X, Check, BookOpen, Users, Sparkles } from 'lucide-react'; // Added Sparkles icon
 import { supabase } from "../../service/supabase";
+import CitationHistory from "./CitationHistory";
 import {
   CitationModalProps,
   CitationFormat,
@@ -26,7 +27,7 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
     totalCitationCount: 0,
     hasUserCited: false // Added this property
   });
-  
+
   // Fetch current user on component mount
   useEffect(() => {
     const fetchUser = async () => {
@@ -35,62 +36,75 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
         setCurrentUser({ id: user.id });
       }
     };
-    
+
     fetchUser();
   }, []);
 
   // Fetch citation stats when thesis changes or modal opens
   const fetchCitationStats = useCallback(async () => {
     if (!thesis?.thesisID || !isOpen) return;
-    
+
     // Pass the current user ID to check if they've cited before
     const stats = await fetchStats(thesis.thesisID, currentUser?.id || null);
     setCitationStats(stats);
   }, [thesis?.thesisID, isOpen, currentUser?.id]);
-  
+
   useEffect(() => {
     if (thesis?.thesisID && isOpen) {
       fetchCitationStats();
     }
   }, [thesis?.thesisID, isOpen, fetchCitationStats]);
-  
+
   useEffect(() => {
     const handleEscKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) onClose();
     };
-    
+
     window.addEventListener('keydown', handleEscKey);
     return () => window.removeEventListener('keydown', handleEscKey);
   }, [isOpen, onClose]);
-  
+
   if (!isOpen || !thesis) return null;
-  
+
   const thesisLink = `https://the-cics.vercel.app/thesis/${thesis.thesisID}`;
   const formattedDate = getCurrentFormattedDate();
   const citationText = generateCitation(thesis, citationFormat);
-  
+
+  // Handle copy (with localStorage citation history)
   const handleCopy = async (type: 'citation' | 'link') => {
     const textToCopy = type === 'citation' ? citationText : thesisLink;
-    
+
     try {
       await navigator.clipboard.writeText(textToCopy);
-      
+
       setCopied(prev => ({ ...prev, [type]: true }));
       setTimeout(() => {
         setCopied(prev => ({ ...prev, [type]: false }));
       }, 2000);
-      
-      // Record the citation action
+
+      // 🧠 Save to localStorage (citation history only)
+      if (type === 'citation' && currentUser?.id) {
+        const key = `citationHistory-${currentUser.id}`;
+        const prev = JSON.parse(localStorage.getItem(key) || '[]');
+        const newEntry = {
+          citation: citationText,
+          date: new Date().toLocaleString(),
+        };
+        localStorage.setItem(key, JSON.stringify([newEntry, ...prev].slice(0, 10)));
+      }
+
+      // Record citation to Supabase or wherever
       await recordCitationAction(
-        thesis.thesisID!, 
-        currentUser?.id || null, 
-        type, 
-        type === 'citation' ? citationFormat : undefined
+        thesis.thesisID!,
+        currentUser?.id || null,
+        type,
+        type === 'citation' ? citationFormat : undefined,
+        textToCopy
       );
-      
-      // Refresh stats after recording
+
+      // Refresh citation stats after recording
       await fetchCitationStats();
-      
+
     } catch (err) {
       console.error('Failed to copy to clipboard or record citation:', err);
     }
@@ -105,7 +119,7 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
   const handleFormatChange = (format: CitationFormat) => {
     setCitationFormat(format);
   };
-  
+
   return (
     <div 
       className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
@@ -126,7 +140,7 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
             <X size={18} />
           </button>
         </div>
-        
+
         <div className="p-5 space-y-5 max-h-[80vh] overflow-y-auto">
           {/* Citation Stats */}
           <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
@@ -140,8 +154,8 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
               {citationStats.totalCitationCount} total {citationStats.totalCitationCount === 1 ? 'citation' : 'citations'}
             </span>
           </div>
-          
-          {/* User has cited notification - NEW COMPONENT */}
+
+          {/* User has cited notification */}
           {citationStats.hasUserCited && (
             <div className="flex items-center gap-2 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 animate-fadeIn">
               <Sparkles size={16} className="text-indigo-500 dark:text-indigo-400" />
@@ -150,7 +164,7 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
               </p>
             </div>
           )}
-          
+
           {/* Format Selection Tabs */}
           <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
             {(Object.keys(formatLabels) as CitationFormat[]).map(format => (
@@ -167,12 +181,12 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
               </button>
             ))}
           </div>
-          
+
           {/* Format description */}
           <p className="text-xs text-gray-500 dark:text-gray-400 italic">
             {formatDescriptions[citationFormat]}
           </p>
-          
+
           {/* Citation Content Box */}
           <div className="relative">
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md border border-gray-200 dark:border-gray-600 hover:border-violet-300 dark:hover:border-violet-500 transition-colors">
@@ -194,12 +208,16 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
               </button>
             </div>
           </div>
-          
+
           <div className="pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Retrieved on {formattedDate}
             </p>
           </div>
+
+          {/* Citation history inserted here */}
+          {currentUser?.id && <CitationHistory userId={currentUser.id} />}
+        
           
           {/* ‼️‼️Will not add this kasi github nalang siguro 'to? or ewan mag ask nalang latur */}
           {/* Link section */}
