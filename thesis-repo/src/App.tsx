@@ -7,8 +7,10 @@ import SignInPage from './pages/userAuth/SignIn';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ThesisDetails from './pages/thesisContent/ThesisDetails';
 import BookmarkedTheses from './pages/bookmark/BookmarkedTheses';
+import CitationHistoryPage from './pages/history/CitationHistoryPage';
 import LandingPage from './pages/landingPage/LandingPage';
 import StudentProfile from './pages/profile/StudentProfile';
+
 
 const App = () => {
   const [user, setUser] = useState<any>(null);
@@ -65,6 +67,7 @@ const App = () => {
         <Route path='/SignInPage' element={<SignInPage />} />
         <Route path='/admin' element={<AdminDashboard />} />
         <Route path="/bookmarked" element={<BookmarkedTheses />} />
+        <Route path="/citation-history" element={<CitationHistoryPage />} />
         <Route path="/thesis/:thesisID" element={<ThesisDetails />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/profile" element={<StudentProfile />} />
