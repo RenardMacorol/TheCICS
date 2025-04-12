@@ -1,4 +1,3 @@
-// src/components/DashNavTop.tsx
 import { Bell, CircleHelp, LogOut, Search, Settings, MoonStar, User, BookMarked, Bookmark, Lightbulb, ChevronLeft, Quote } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +13,7 @@ type Notification = {
 
 interface Search {
   setSearchQuery: (query: string) => void;
-  searchQuery: string; // Add searchQuery to pass the current value
+  searchQuery: string;
 }
 
 const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
@@ -106,6 +105,22 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
     navigate('/bookmarked');
     setSideBarOpen(false);
   };
+
+  // Handler for toggling notifications dropdown
+  const handleNotificationsToggle = () => {
+    setNotificationsOpen(prev => !prev);
+    setProfileOpen(false); // Close profile dropdown when notifications are toggled
+    if (!isNotificationsOpen && unreadCount > 0) {
+      markNotificationsAsRead();
+    }
+  };
+
+  // Handler for toggling profile dropdown
+  const handleProfileToggle = () => {
+    setProfileOpen(prev => !prev);
+    setNotificationsOpen(false); // Close notifications dropdown when profile is toggled
+  };
+
   return (
     <nav className="bg-violet-800 text-white px-6 py-3 flex justify-between items-center shadow-md">
       <div className="flex items-center">
@@ -138,12 +153,7 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
       <div className="flex gap-4 items-center">
         <div className="relative">
           <button
-            onClick={() => {
-              setNotificationsOpen(!isNotificationsOpen);
-              if (!isNotificationsOpen && unreadCount > 0) {
-                markNotificationsAsRead();
-              }
-            }}
+            onClick={handleNotificationsToggle} // Use the new handler
             className="relative p-1.5 hover:bg-violet-700 rounded-full transition-colors"
           >
             <Bell className="w-5 h-5"/>
@@ -192,7 +202,7 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
 
         <div className="relative">
           <button
-            onClick={() => setProfileOpen(!isProfileOpen)}
+            onClick={handleProfileToggle} // Use the new handler
             className="relative p-1.5 hover:bg-violet-700 rounded-full transition-colors overflow-hidden"
           >
             {profilePicture ? (
