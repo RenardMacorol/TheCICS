@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Add this import for navigation
 import { supabase } from "../../service/supabase";
-import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2, Pencil } from 'lucide-react';
+import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2 } from 'lucide-react';
 import CitationModal from "./CitationModal"; // Add this import for the citation modal
 import Thesis from "../../service/Types/Thesis";
 
@@ -257,10 +257,10 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                     <span>Code</span>
                                 </button>
                                 <button 
-                                    onClick={() => window.open(item.pdfFileUrl, "_blank")}
+                                    onClick={() => handleThesisClick(item.thesisID)}
                                     className="flex items-center gap-1 bg-cyan-100 text-cyan-700 rounded-full px-3 py-1 text-sm hover:bg-cyan-200 transition-colors"
                                 >
-                                    <Pencil size={16} />
+                                    <BookOpen size={16} />
                                     <span>Read</span>
                                 </button>
                             </div>
