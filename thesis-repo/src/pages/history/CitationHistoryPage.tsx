@@ -6,7 +6,7 @@ const CitationHistoryPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFormat, setSelectedFormat] = useState<string | null>(null); // State for selected citation format
 
-  const citationFormats = ["APA", "MLA", "CHICAGO", "IEEE"];
+  const citationFormats = ["APA", "MLA", "CHICAGO"];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

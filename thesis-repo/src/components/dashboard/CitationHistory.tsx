@@ -7,7 +7,7 @@ interface Citation {
   userID: string;
   thesisID: string;
   citationType: 'citation' | 'link';
-  citationFormat?: 'apa' | 'mla' | 'chicago' | 'ieee';
+  citationFormat?: 'apa' | 'mla' | 'chicago';
   citationText: string;
   timestamp: string;
   thesis: {

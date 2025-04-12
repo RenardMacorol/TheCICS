@@ -4,8 +4,8 @@ import { supabase } from "../../service/supabase";
 import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2 } from 'lucide-react';
 import CitationModal from "./CitationModal";
 import Thesis from "../../service/Types/Thesis";
-import { FetchThesisActive } from "../../service/contentManagement/FetchThesisActive";
-import { FetchBookmark } from "../../service/contentManagement/FetchBookmark";
+import { FetchThesisActive } from "../../service/ContentManagement/FetchThesisActive";
+import { FetchBookmark } from "../../service/ContentManagement/FetchBookmark"
 interface FilterState {
     sort: string;
     year: string;
