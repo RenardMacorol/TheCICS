@@ -27,10 +27,17 @@
   type Comment = {
     commentID: number;
     thesisID: string;
-    userName: string;
+    username: string;
     content: string;
     createdAt: string;
+    Users: {
+      name: string;
+      email: string;
+    } | null;
+    
   };
+
+  
 
   const ThesisDetails = () => {
     const { thesisID } = useParams();
@@ -70,7 +77,7 @@
       const fetchComments = async () => {
         const { data, error } = await supabase
           .from("comments")
-          .select("commentID, thesisID, userName, content, createdAt")
+          .select("commentID, thesisID, username, content, createdAt, userid, Users(name)")
           .eq("thesisID", thesisID)
           .order("createdAt", { ascending: false });
 
@@ -128,6 +135,7 @@
             content: newComment,
             userid: user.id,
             createdAt: new Date().toISOString(), // Store user ID for reference
+            
           }
         ])
         .select();
@@ -193,7 +201,9 @@
               ) : (
                 comments.map((comment) => (
                   <div key={comment.commentID} className="bg-gray-200 p-2 rounded-md my-2">
-                    <p className="text-sm font-semibold">{comment.userName}</p>
+                    <p className="text-sm text-gray-600">
+                    <strong>{comment.Users?.name || comment.username}</strong> • {new Date(comment.createdAt).toLocaleString()}
+                    </p>
                     <p className="text-gray-700">{comment.content}</p>
                     <p className="text-gray-500 text-xs">
                       {comment.createdAt && !isNaN(new Date(comment.createdAt).getTime()) 
