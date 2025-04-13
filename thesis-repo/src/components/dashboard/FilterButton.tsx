@@ -15,6 +15,7 @@ const FilterButton: React.FC<FilterButtonProps> = ({ onFilterChange }) => {
     const [allKeywords, setAllKeywords] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showAllKeywords, setShowAllKeywords] = useState(false);
+    const [keywordSearch, setKeywordSearch] = useState(''); // State for search input
     
     const years = ['2025', '2024', '2023', '2022', '2021', '2020'];
     
@@ -88,7 +89,11 @@ const FilterButton: React.FC<FilterButtonProps> = ({ onFilterChange }) => {
         onFilterChange?.({ sort: activeSort, year: selectedYear, keywords: newKeywords });
     };
 
-    const displayedKeywords = showAllKeywords ? allKeywords : popularKeywords;
+    // Determine which keywords to display based on search and toggle state
+    const baseKeywords = keywordSearch ? allKeywords : (showAllKeywords ? allKeywords : popularKeywords);
+    const displayedKeywords = baseKeywords.filter(keyword =>
+        keyword.toLowerCase().includes(keywordSearch.toLowerCase())
+    );
 
     return (
         <div className="px-6 py-4">
@@ -200,7 +205,8 @@ const FilterButton: React.FC<FilterButtonProps> = ({ onFilterChange }) => {
                                     <Tag size={16} className="mr-1 text-violet-500" />
                                     Keywords {selectedKeywords.length > 0 && `(${selectedKeywords.length} selected)`}
                                 </h3>
-                                {allKeywords.length > popularKeywords.length && (
+                                {/* Only show the toggle if there's no search term and more keywords exist */}
+                                {!keywordSearch && allKeywords.length > popularKeywords.length && (
                                     <button 
                                         className="text-xs text-violet-600 dark:text-violet-400 hover:underline"
                                         onClick={() => setShowAllKeywords(!showAllKeywords)}
@@ -208,6 +214,17 @@ const FilterButton: React.FC<FilterButtonProps> = ({ onFilterChange }) => {
                                         {showAllKeywords ? "Show less" : "Show all"}
                                     </button>
                                 )}
+                            </div>
+                            
+                            {/* Search Input for Keywords */}
+                            <div className="mb-2">
+                                <input
+                                    type="text"
+                                    placeholder="Search keywords..."
+                                    value={keywordSearch}
+                                    onChange={(e) => setKeywordSearch(e.target.value)}
+                                    className="w-full px-3 py-1 text-sm rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                                />
                             </div>
                             
                             {isLoading ? (
@@ -261,7 +278,9 @@ const FilterButton: React.FC<FilterButtonProps> = ({ onFilterChange }) => {
                                                     </button>
                                                 ))
                                             ) : (
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">No keywords available</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                    {keywordSearch ? "No keywords found" : "No keywords available"}
+                                                </p>
                                             )}
                                         </div>
                                     </div>
@@ -297,6 +316,7 @@ const FilterButton: React.FC<FilterButtonProps> = ({ onFilterChange }) => {
                                     onClick={() => {
                                         setSelectedYear('all');
                                         setSelectedKeywords([]);
+                                        setKeywordSearch('');
                                         onFilterChange?.({ sort: activeSort, year: 'all', keywords: [] });
                                     }}
                                 >
