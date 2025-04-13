@@ -118,36 +118,52 @@
     const handleCommentSubmit = async () => {
       if (!newComment.trim()) return;
     
-      // Get the authenticated user's information
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        console.error("User is not authenticated");
+      // Get the authenticated user's info
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+    
+      if (userError || !user) {
+        console.error("User is not authenticated:", userError?.message || "");
         return;
       }
+    
+      // Fetch the user's full name from the Users table
+      const { data: userInfo, error: userInfoError } = await supabase
+        .from("Users")
+        .select("name")
+        .eq("googleAuthID", user.id)
+        .single();
+    
+      if (userInfoError || !userInfo) {
+        console.error("Error fetching user name:", userInfoError?.message || "");
+        return;
+      }
+    
+      const { name } = userInfo;
     
       const { data, error } = await supabase
         .from("comments")
         .insert([
           {
             thesisID,
-            username: user.email, // Use user's email instead of "Anonymous"
+            username: name, 
             content: newComment,
             userid: user.id,
-            createdAt: new Date().toISOString(), // Store user ID for reference
-            
-          }
+            createdAt: new Date().toISOString(),
+          },
         ])
         .select();
     
       if (error) {
         console.error("Error adding comment:", error.message || error);
       } else {
-        
         setComments([data[0], ...comments]);
         setNewComment("");
       }
     };
+    
     
 
     if (loading) return <div className="text-center p-10">Loading thesis details...</div>;
