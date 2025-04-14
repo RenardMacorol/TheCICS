@@ -27,10 +27,17 @@
   type Comment = {
     commentID: number;
     thesisID: string;
-    userName: string;
+    username: string;
     content: string;
     createdAt: string;
+    Users: {
+      name: string;
+      email: string;
+    } | null;
+    
   };
+
+  
 
   const ThesisDetails = () => {
     const { thesisID } = useParams();
@@ -70,7 +77,7 @@
       const fetchComments = async () => {
         const { data, error } = await supabase
           .from("comments")
-          .select("commentID, thesisID, userName, content, createdAt")
+          .select("commentID, thesisID, username, content, createdAt, userid, Users(name)")
           .eq("thesisID", thesisID)
           .order("createdAt", { ascending: false });
 
@@ -111,35 +118,52 @@
     const handleCommentSubmit = async () => {
       if (!newComment.trim()) return;
     
-      // Get the authenticated user's information
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        console.error("User is not authenticated");
+      // Get the authenticated user's info
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+    
+      if (userError || !user) {
+        console.error("User is not authenticated:", userError?.message || "");
         return;
       }
+    
+      // Fetch the user's full name from the Users table
+      const { data: userInfo, error: userInfoError } = await supabase
+        .from("Users")
+        .select("name")
+        .eq("googleAuthID", user.id)
+        .single();
+    
+      if (userInfoError || !userInfo) {
+        console.error("Error fetching user name:", userInfoError?.message || "");
+        return;
+      }
+    
+      const { name } = userInfo;
     
       const { data, error } = await supabase
         .from("comments")
         .insert([
           {
             thesisID,
-            username: user.email, // Use user's email instead of "Anonymous"
+            username: name, 
             content: newComment,
             userid: user.id,
-            createdAt: new Date().toISOString(), // Store user ID for reference
-          }
+            createdAt: new Date().toISOString(),
+          },
         ])
         .select();
     
       if (error) {
         console.error("Error adding comment:", error.message || error);
       } else {
-        
         setComments([data[0], ...comments]);
         setNewComment("");
       }
     };
+    
     
 
     if (loading) return <div className="text-center p-10">Loading thesis details...</div>;
@@ -193,7 +217,9 @@
               ) : (
                 comments.map((comment) => (
                   <div key={comment.commentID} className="bg-gray-200 p-2 rounded-md my-2">
-                    <p className="text-sm font-semibold">{comment.userName}</p>
+                    <p className="text-sm text-gray-600">
+                    <strong>{comment.Users?.name || comment.username}</strong> • {new Date(comment.createdAt).toLocaleString()}
+                    </p>
                     <p className="text-gray-700">{comment.content}</p>
                     <p className="text-gray-500 text-xs">
                       {comment.createdAt && !isNaN(new Date(comment.createdAt).getTime()) 
