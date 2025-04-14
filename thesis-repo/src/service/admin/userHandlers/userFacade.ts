@@ -1,5 +1,5 @@
 import { UserBase } from "../../Class/UserBase";
-import { FetchUserAll } from "../../contentManagement/FetchUserAll";
+import { FetchUserAll } from "../../ContentManagement/FetchUserAll";
 import { Fetchable } from "../../Types/Fetchable";
 import User from "../../Types/User";
 

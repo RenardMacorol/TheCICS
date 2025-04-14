@@ -77,7 +77,7 @@
       const fetchComments = async () => {
         const { data, error } = await supabase
           .from("comments")
-          .select("commentID, thesisID, username, content, createdAt, userid, Users(name)")
+          .select("*")
           .eq("thesisID", thesisID)
           .order("createdAt", { ascending: false });
 
@@ -172,7 +172,7 @@
 
     return (
       <div className="bg-gray-100 min-h-screen text-white">
-        <DashNavTop setSearchQuery={() => {}} />
+        <DashNavTop setSearchQuery={() => { } } searchQuery={""} />
         <FilterButton />
 
         <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-5 text-black">

@@ -1,4 +1,4 @@
-import { FetchUserAll } from '../contentManagement/FetchUserAll';
+import { FetchUserAll } from '../ContentManagement/FetchUserAll';
 import { supabase } from '../supabase';
 import User from '../Types/User';
 

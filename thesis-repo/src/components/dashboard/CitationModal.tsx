@@ -12,7 +12,7 @@ import {
   getCurrentFormattedDate,
   fetchCitationStats as fetchStats,
   recordCitation as recordCitationAction
-} from "../../service/citation/citationUtils";
+} from "../../service/Citation/citationUtils";
 
 const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
   const [copied, setCopied] = useState<CopyState>({
