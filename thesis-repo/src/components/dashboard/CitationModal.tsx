@@ -12,7 +12,7 @@ import {
   getCurrentFormattedDate,
   fetchCitationStats as fetchStats,
   recordCitation as recordCitationAction
-} from "../../service/Citation/citationUtils";
+} from "../../service/citation/citationUtils";
 
 const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
   const [copied, setCopied] = useState<CopyState>({
@@ -75,9 +75,9 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
     try {
       await navigator.clipboard.writeText(textToCopy);
       
-      setCopied(prev => ({ ...prev, [type]: true }));
+      setCopied((prev: CopyState) => ({ ...prev, [type]: true }));
       setTimeout(() => {
-        setCopied(prev => ({ ...prev, [type]: false }));
+        setCopied((prev: CopyState) => ({ ...prev, [type]: false }));
       }, 2000);
       
       // Record the citation action
