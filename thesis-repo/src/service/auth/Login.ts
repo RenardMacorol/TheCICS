@@ -9,6 +9,7 @@ const Login = async(setError: (message:string) => void) => {
         return;
     }
 
+
     // Wait for user session to update
     setTimeout(async () => {
         const { data: userData } = await supabase.auth.getUser();

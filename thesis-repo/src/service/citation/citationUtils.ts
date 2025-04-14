@@ -81,6 +81,7 @@ export const checkUserCitation = async (
       .eq('userID', userID)
       .limit(1);
       
+
     if (error) {
       console.error('Error checking user citation:', error);
       return false;

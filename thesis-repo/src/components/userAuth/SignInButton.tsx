@@ -4,7 +4,6 @@ import Login from '../../service/Auth/Login';
 
 const SignIn = () => {
     const location = useLocation();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [errorMessage, setErrorMessage] = useState<string | null>(null); // State to store error messages
          
     useEffect(() => {
