@@ -6,6 +6,7 @@ import CitationModal from "./CitationModal";
 import Thesis from "../../service/Types/Thesis";
 import { FetchThesisActive } from "../../service/ContentManagement/FetchThesisActive";
 import { FetchBookmark } from "../../service/ContentManagement/FetchBookmark"
+import { FetchAuthor } from "../../service/ContentManagement/FetchAuthors";
 interface FilterState {
     sort: string;
     year: string;
@@ -19,6 +20,7 @@ interface ContentListProps {
 const ContentList = ({ searchQuery, filters }: ContentListProps) => {
     const [items, setItems] = useState<Thesis[]>([]);
     const [filteredThesis, setFilteredThesis] = useState<Thesis[]>([]);
+    const [authors, setAuthors] = useState<Record<string,string>>({});
     const [bookmarks, setBookmarks] = useState<string[]>([]);
     const [expandedAbstracts, setExpandedAbstracts] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(true);
@@ -41,7 +43,17 @@ const ContentList = ({ searchQuery, filters }: ContentListProps) => {
             setBookmarks(fetchBookmark.bookmarks); // Ensure correct state update
             setLoading(false);
         };
+         const fetchAuthors = async () => {
+        const fetcher = new FetchAuthor();
+        const result = await fetcher.fetch() // Create a map like { "uuid123": "John Doe" }
+        const map: Record<string, string> = {};
+        result.forEach(author => {
+          map[author.authorID] = `${author.firstName} ${author.lastName}`;
+        });;
+        setAuthors(map);
+         }
        
+        fetchAuthors()
         fetchContent();
     }, []);
     
@@ -239,7 +251,7 @@ const ContentList = ({ searchQuery, filters }: ContentListProps) => {
                                 </button>
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                                By <span className="font-medium">{item.authorName}</span> • Published {item.publicationYear}
+                                By <span className="font-medium">{authors[item.authorID]}</span> • Published {item.publicationYear}
                             </p>
                             <div className="flex gap-2 mb-2 flex-wrap">
                                 {highlightMatchingKeywords(item.keywords)}
