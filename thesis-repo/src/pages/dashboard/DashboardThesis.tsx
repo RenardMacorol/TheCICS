@@ -40,13 +40,12 @@ const Dashboard = () => {
       setRestrict(await restrictChecker(user.id))
       setUser(user);
       }
- 
-
     }
     if(!userScannned){
     handleUser();
     setUserScanned(true)
     }
+
 
   }, [userScannned]);
 

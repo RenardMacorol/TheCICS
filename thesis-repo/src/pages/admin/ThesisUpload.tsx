@@ -16,6 +16,7 @@ const ThesisUpload = () => {
 
   // Form Field
   const [title, setTitle] = useState("");
+  const [githubURL, setGithubURL] = useState("");
   const [abstract, setAbstract] = useState("");
   const [publicationYear, setPublicationYear] = useState("");
   const [keywords, setKeywords] = useState("");
@@ -84,7 +85,7 @@ const ThesisUpload = () => {
 
   // Handle file upload
   const handleUpload = async () => {
-    if (!title || !abstract || !publicationYear || !keywords || (!selectedAuthor && !newAuthor)) {
+    if (!title || !githubURL|| !abstract || !publicationYear || !keywords || (!selectedAuthor && !newAuthor)) {
       setMessage("❌ Please complete all fields before uploading.");
       return;
     }
@@ -153,6 +154,7 @@ const ThesisUpload = () => {
           abstract,
           publicationYear,
           keywords,
+          githubURL,
           pdfFileUrl: fileData.publicUrl,
           status: "Active"
         },
@@ -169,6 +171,7 @@ const ThesisUpload = () => {
     setUploading(false);
     setFiles([]); // Clear file list
     setTitle("");
+    setGithubURL("");
     setAbstract("");
     setPublicationYear("");
     setKeywords("");
@@ -252,6 +255,19 @@ const ThesisUpload = () => {
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#06B8BE]/30 focus:border-[#06B8BE]"
           value={title}
           onChange={(e) => setTitle(e.target.value)} 
+          required 
+        /> 
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Github Link
+        </label>
+        <input 
+          type="text"
+          placeholder="Enter the complete thesis title"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#06B8BE]/30 focus:border-[#06B8BE]"
+          value={githubURL}
+          onChange={(e) => setGithubURL(e.target.value)} 
           required 
         /> 
       </div>

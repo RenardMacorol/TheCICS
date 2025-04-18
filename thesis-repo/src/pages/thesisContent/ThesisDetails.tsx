@@ -3,6 +3,7 @@
   import { supabase } from "../../service/supabase";
   import DashNavTop from '../../components/dashboard/DashNavTop';
   import FilterButton from "../../components/dashboard/FilterButton";
+import { AddViewer } from "../../service/ContentManagement/AddThesisView";
 
   type Author = {
     firstName: string;
@@ -10,7 +11,7 @@
   };
 
   type Thesis = {
-    thesisID: string;
+    thesisID: number;
     authorID: number | null;
     title: string;
     abstract: string;
@@ -20,8 +21,8 @@
     status: string;
     author?: Author | Author[];
     authorName?: string;
-    views: number;
-    likes: number;
+    views?: number;
+    likes?: number;
   };
 
   type Comment = {
@@ -52,7 +53,7 @@
         const { data, error } = await supabase
           .from("Thesis")
           .select(`
-            thesisID, title, abstract, publicationYear, keywords, pdfFileUrl, status, authorID, views, likes,
+            thesisID, title, abstract, publicationYear, keywords, pdfFileUrl, status, authorID, 
             Author:authorID (firstName, lastName)
           `)
           .eq("thesisID", thesisID)
@@ -62,13 +63,22 @@
           console.error("Error fetching thesis details:", error);
         } else {
           const author = data.Author && Array.isArray(data.Author) ? data.Author[0] : data.Author;
-
-          setThesis({
+          const thesis =({
             ...data,
             authorName: author ? `${author.firstName} ${author.lastName}` : "Unknown Author",
           });
 
-          setLikes(data.likes);
+          const user = await supabase.auth.getUser()
+          if(user.data.user?.id){
+          const count = await AddViewer(user.data?.user.id, thesis.thesisID)
+          setThesis({
+            ...thesis,
+            views: count ?? 0,
+          })
+          }
+
+          
+
         }
 
         setLoading(false);
@@ -90,18 +100,11 @@
         }
       };
 
-      const incrementViews = async () => {
-        await supabase
-          .from("Thesis")
-          .update({ views: supabase.rpc("increment_view_count", { thesis_id: thesisID }) })
-          .eq("thesisID", thesisID);
-      };
-      
+               
 
       if (thesisID) {
         fetchThesisDetails();
         fetchComments();
-        incrementViews();
       }
     }, [thesisID]);
 
