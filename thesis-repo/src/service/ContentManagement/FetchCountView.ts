@@ -1,7 +1,7 @@
 import { ViewBase } from "../Class/ViewBase";
 import { supabase } from "../supabase";
 
-export class countViewByThesisID  extends ViewBase {
+export class CountViewByThesisID  extends ViewBase {
     async fetchCount(thesisID:number): Promise<number> { // Fetch theses
            const { count, error } = await supabase
             .from("view")

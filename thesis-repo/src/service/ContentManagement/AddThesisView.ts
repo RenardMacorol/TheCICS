@@ -1,5 +1,5 @@
 import { supabase } from "../supabase";
-import { countViewByThesisID } from "./fetchCountView";
+import { CountViewByThesisID } from "./FetchCountView";
 
  export const AddViewer = async (user_id: string, thesisID: number) => {
     const { data: existingView, error: viewError } = await supabase
@@ -23,7 +23,7 @@ import { countViewByThesisID } from "./fetchCountView";
       }
     }
 
-    const countView = new  countViewByThesisID()
+    const countView = new CountViewByThesisID()
     const count =  await countView.fetchCount(thesisID)
 
     return count ?? 0; 
