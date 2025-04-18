@@ -3,6 +3,7 @@ import { supabase } from "../supabase";
 import { Fetchable } from "../Types/Fetchable";
 import Thesis from '../Types/Thesis';
 import { countCommentByThesisID } from "./FetchCountComment";
+import { countViewByThesisID } from "./fetchCountView";
 
 export class FetchThesisActive  extends ThesisBase implements Fetchable<Thesis>{
     async fetch(): Promise<Thesis[]> { // Fetch theses
@@ -16,21 +17,24 @@ export class FetchThesisActive  extends ThesisBase implements Fetchable<Thesis>{
                 return [];
             }
 
-        const counter = new countCommentByThesisID();
+        const counterComment = new countCommentByThesisID();
+        const counterView = new countViewByThesisID();
 
-        const thesesWithCommentCounts = await Promise.all(
+        const thesesCountStats = await Promise.all(
             thesesData.map(async (thesis) => {
-                const commentCount = await counter.fetchCount(thesis.thesisID);
+                const commentCount = await counterComment.fetchCount(thesis.thesisID);
+                const viewCount = await counterView.fetchCount(thesis.thesisID);
                 return {
                     ...thesis,
-                    comments : commentCount ?? 0// adds a new property
+                    comments : commentCount ?? 0,// adds a new property
+                    views : viewCount ?? 0// adds a new property
                 };
             })
         );
+        
+        this._thesis = thesesCountStats;            
  
-            // Optionally, log the final list of theses with comments
 
-            this._thesis = thesesWithCommentCounts            
             console.log("All Fetched Theses with Comments:", this._thesis);
             return this._thesis;
 

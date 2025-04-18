@@ -1,17 +1,18 @@
-import { CommentBase } from "../Class/CommentBase";
+import { ViewBase } from "../Class/ViewBase";
 import { supabase } from "../supabase";
 
-export class countCommentByThesisID  extends CommentBase {
+export class countViewByThesisID  extends ViewBase {
     async fetchCount(thesisID:number): Promise<number> { // Fetch theses
            const { count, error } = await supabase
-            .from("comments")
+            .from("view")
             .select("*", { count: "exact", head: true })
             .eq("thesisID", thesisID);
 
             if (error) {
-            console.error(`Error counting comments for thesisID ${count}:`, error);
+            console.error(`Error counting view for thesisID ${count}:`, error);
                 return 0;
             }
+            console.log(`${thesisID}:`,count)
             // For each fetched thesis, count the comments and add the count to the thesis object
             
             return count ?? 0;
