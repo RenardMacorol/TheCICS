@@ -12,6 +12,7 @@ interface Thesis{
     likes?: number;
     comments?: number;
     keywordMatch?: number;
+    githubURL?: string;
 }
 
 export default Thesis;
