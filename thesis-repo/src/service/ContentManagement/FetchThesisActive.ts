@@ -39,6 +39,7 @@ export class FetchThesisActive  extends ThesisBase implements Fetchable<Thesis>{
             return this._thesis;
 
     }
+    
      
 }
 

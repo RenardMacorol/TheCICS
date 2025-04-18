@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Add this import for navigation
 import { supabase } from "../../service/supabase";
-import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2 } from 'lucide-react';
+import { BookOpen, Github, Star, Eye, ThumbsUp, MessageSquare, Share2  } from 'lucide-react';
 import CitationModal from "./CitationModal"; // Add this import for the citation modal
 import Thesis from "../../service/Types/Thesis";
+import { FetchAuthor } from "../../service/ContentManagement/FetchAuthors";
+import { FetchBookmarkThesis } from "../../service/ContentManagement/FetchBookMarkThesis";
+import { handleGithubButton } from "../../service/Actions/handleGithubButton";
 
 interface Search {
     searchQuery: string;
@@ -16,6 +19,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null); // Add state for selected thesis
     const [isCitationModalOpen, setIsCitationModalOpen] = useState(false); // Add state for citation modal
+    const [authors, setAuthors] = useState<Record<string,string>>({});
     const navigate = useNavigate(); // Add navigation hook
 
     useEffect(() => {
@@ -47,30 +51,24 @@ const BookmarkList = ({ searchQuery }: Search) => {
                 return;
             }
             
-            const { data: thesesData, error: thesesError } = await supabase
-                .from("Thesis")
-                .select("*")
-                .in('thesisID', bookmarkIds)
-                .eq('status', 'Active');
+            const bookmarkThesisFetch = new FetchBookmarkThesis(bookmarkIds);            
+            const theses = await bookmarkThesisFetch.fetch()
             
-            if (thesesError) {
-                console.error("Error fetching bookmarked theses:", thesesError);
-                setLoading(false);
-                return;
-            }
             
-            const enhancedData = thesesData.map(thesis => ({
-                ...thesis,
-                authorName: `Author ${thesis.authorID}`,
-                views: Math.floor(Math.random() * 500) + 50,
-                likes: Math.floor(Math.random() * 100) + 5,
-                comments: Math.floor(Math.random() * 20)
-            }));
-            
-            console.log("Fetched bookmarked theses: ", enhancedData);
-            setBookmarkedTheses(enhancedData);
+            setBookmarkedTheses(theses);
             setLoading(false);
         };
+         const fetchAuthors = async () => {
+        const fetcher = new FetchAuthor();
+        const result = await fetcher.fetch() // Create a map like { "uuid123": "John Doe" }
+        const map: Record<string, string> = {};
+        result.forEach(author => {
+          map[author.authorID] = `${author.firstName} ${author.lastName}`;
+        });;
+        setAuthors(map);
+         }
+       
+        fetchAuthors()
 
         fetchBookmarkedTheses();
     }, [refreshTrigger]);
@@ -184,7 +182,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                     </button>
                                 </div>
                                 <p className="text-sm text-gray-600 mb-2">
-                                    By <span className="font-medium">{item.authorName}</span> • Published {item.publicationYear}
+                                    By <span className="font-medium">{authors[item.authorID]}</span> • Published {item.publicationYear}
                                 </p>
                                 <div className="flex gap-2 mb-2 flex-wrap">
                                     {item.keywords.split(',').map((keyword, idx) => (
@@ -198,15 +196,15 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                 <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                                     <div className="flex items-center gap-1">
                                         <Eye size={14} />
-                                        <span>{item.views}</span>
+                                    <span>{item.views !==  null && item.views !== undefined ? item.views: 0}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <ThumbsUp size={14} />
-                                        <span>{item.likes}</span>
+                                    <span>{item.likes !==  null && item.likes !== undefined ? item.likes: 0}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <MessageSquare size={14} />
-                                        <span>{item.comments}</span>
+                                    <span>{item.comments !==  null && item.comments !== undefined ? item.comments: 0}</span>
                                     </div>
                                 </div>
                             </div>
@@ -252,7 +250,9 @@ const BookmarkList = ({ searchQuery }: Search) => {
                             </div>
                             
                             <div className="flex gap-2">
-                                <button className="flex items-center gap-1 bg-violet-100 text-violet-700 rounded-full px-3 py-1 text-sm hover:bg-violet-200 transition-colors">
+                                <button 
+                                onClick={() => handleGithubButton(item.githubURL!)}
+                                className="flex items-center gap-1 bg-violet-100 text-violet-700 rounded-full px-3 py-1 text-sm hover:bg-violet-200 transition-colors">
                                     <Github size={16} />
                                     <span>Code</span>
                                 </button>
