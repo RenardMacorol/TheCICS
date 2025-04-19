@@ -4,7 +4,7 @@ import DashNavTop from "../../components/dashboard/DashNavTop";
 
 const CitationHistoryPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFormat, setSelectedFormat] = useState<string | null>(null); // State for selected citation format
+  const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
 
   const citationFormats = ["APA", "MLA", "CHICAGO"];
 

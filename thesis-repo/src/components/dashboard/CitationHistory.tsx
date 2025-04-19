@@ -26,7 +26,7 @@ interface CitationStats {
 
 interface Search {
   searchQuery: string;
-  selectedFormat: string | null; // Add selectedFormat prop
+  selectedFormat: string | null;
 }
 
 const CitationHistory = ({ searchQuery, selectedFormat }: Search) => {
@@ -51,41 +51,28 @@ const CitationHistory = ({ searchQuery, selectedFormat }: Search) => {
   useEffect(() => {
     const fetchCitationHistory = async () => {
       setLoading(true);
-
       if (!currentUser) {
         setLoading(false);
         return;
       }
 
-      // Fetch user's citations with thesis details
+      // Fetch citations with associated thesis data from ThesisCitationCount
       const { data: citationData, error: citationError } = await supabase
-        .from("UserCitations")
+        .from("ThesisCitationCount")
         .select(`
-          id,
-          userID,
-          thesisID,
-          citationType,
-          citationFormat,
-          citationText,
-          timestamp,
-          thesis:Thesis (
-            thesisID,
-            title,
-            authorID,
-            publicationYear,
-            authorName
-          )
+          *
         `)
-        .eq('userID', currentUser.id)
-        .order('timestamp', { ascending: false });
+        .eq('thesisID', citations[0]?.thesisID || '') // Use thesisID from citations or empty string
+        .order('copiedAt', { ascending: false });
 
       if (citationError) {
         console.error("Error fetching citations:", citationError);
         setLoading(false);
+        setCitations([]);
         return;
       }
 
-      // Normalize the thesis field (handle array vs. object)
+      // Normalize the citation data to match the Citation interface
       const normalizedCitations = (citationData || []).map(citation => {
         let normalizedThesis;
         if (Array.isArray(citation.thesis)) {
@@ -105,7 +92,13 @@ const CitationHistory = ({ searchQuery, selectedFormat }: Search) => {
         }
 
         return {
-          ...citation,
+          id: citation.citation_count_id,
+          userID: citation.userID,
+          thesisID: citation.thesisID,
+          citationType: citation.citationType,
+          citationFormat: citation.citationFormat,
+          citationText: citation.citationText || "Citation text unavailable",
+          timestamp: citation.copiedAt,
           thesis: normalizedThesis,
         };
       });
@@ -114,7 +107,7 @@ const CitationHistory = ({ searchQuery, selectedFormat }: Search) => {
       const stats: Record<string, CitationStats> = {};
       for (const citation of normalizedCitations) {
         const { data: statsData, error: statsError } = await supabase
-          .from("UserCitations")
+          .from("ThesisCitationCount")
           .select("userID", { count: "exact" })
           .eq('thesisID', citation.thesisID);
 
