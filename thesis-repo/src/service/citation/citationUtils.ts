@@ -11,7 +11,6 @@ export type CopyState = {
 export type CitationStats = {
   uniqueUserCount: number;
   totalCitationCount: number;
-  hasUserCited: boolean; // Added this property
 }
 
 export type CitationModalProps = {
@@ -66,41 +65,10 @@ export const getCurrentFormattedDate = (): string => {
   return `${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getDate()}, ${currentDate.getFullYear()}`;
 };
 
-// Check if a specific user has cited this thesis
-export const checkUserCitation = async (
-  thesisID: string,
-  userID: string | null
-): Promise<boolean> => {
-  if (!thesisID || !userID) return false;
-  
-  try {
-    const { data, error } = await supabase
-      .from('ThesisCitationCount')
-      .select('id')
-      .eq('thesisID', thesisID)
-      .eq('userID', userID)
-      .limit(1);
-      
-
-    if (error) {
-      console.error('Error checking user citation:', error);
-      return false;
-    }
-    
-    return data && data.length > 0;
-  } catch (err) {
-    console.error('Failed to check user citation:', err);
-    return false;
-  }
-};
-
 // Fetch citation statistics
-export const fetchCitationStats = async (
-  thesisID: string,
-  userID: string | null
-): Promise<CitationStats> => {
+export const fetchCitationStats = async (thesisID: string): Promise<CitationStats> => {
   if (!thesisID) {
-    return { uniqueUserCount: 0, totalCitationCount: 0, hasUserCited: false };
+    return { uniqueUserCount: 0, totalCitationCount: 0 };
   }
   
   try {
@@ -112,13 +80,13 @@ export const fetchCitationStats = async (
     
     if (fetchError) {
       console.error('Error fetching citation data:', fetchError);
-      return { uniqueUserCount: 0, totalCitationCount: 0, hasUserCited: false };
+      return { uniqueUserCount: 0, totalCitationCount: 0 };
     }
     
     // Count total citations (Ano 'to per click ng user wahahhaha)
     const totalCount = allCitations?.length || 0;
     
-    // Count unique users
+    // Count unique users (filter out null userIDs and count unique values)
     const validUserIDs = allCitations
       ?.filter(citation => citation.userID !== null)
       .map(citation => citation.userID) || [];
@@ -126,17 +94,13 @@ export const fetchCitationStats = async (
     const uniqueUserIDs = [...new Set(validUserIDs)];
     const uniqueCount = uniqueUserIDs.length;
     
-    // Check if current user has cited this thesis
-    const hasUserCited = userID ? uniqueUserIDs.includes(userID) : false;
-    
     return {
       uniqueUserCount: uniqueCount,
-      totalCitationCount: totalCount,
-      hasUserCited
+      totalCitationCount: totalCount
     };
   } catch (err) {
     console.error('Failed to fetch citation statistics:', err);
-    return { uniqueUserCount: 0, totalCitationCount: 0, hasUserCited: false };
+    return { uniqueUserCount: 0, totalCitationCount: 0 };
   }
 };
 
@@ -145,22 +109,28 @@ export const recordCitation = async (
   thesisID: string,
   userID: string | null,
   type: 'citation' | 'link',
-  format?: CitationFormat,
-  content?: string
-) => {
-  // Record in stats table
-  await supabase.from('citation_stats').insert([{
-    thesis_id: thesisID,
-    user_id: userID,
-    citation_type: type,
-    citation_format: format,
-  }]);
-
-  // Record in history table
-  await supabase.from('citation_history').insert([{
-    thesis_id: thesisID,
-    user_id: userID,
-    type,
-    content,
-  }]);
+  citationFormat?: CitationFormat
+): Promise<boolean> => {
+  try {
+    const { error: insertError } = await supabase
+      .from('ThesisCitationCount')
+      .insert({
+        thesisID: thesisID,
+        userID: userID || null,
+        citationFormat: type === 'citation' ? citationFormat : null,
+        citationType: type,
+        copiedAt: new Date().toISOString()
+      });
+      
+    if (insertError) {
+      console.error('Error recording citation:', insertError);
+      return false;
+    }
+    
+    console.log(`Citation recorded successfully. Type: ${type}, User: ${userID || 'anonymous'}`);
+    return true;
+  } catch (err) {
+    console.error('Failed to record citation:', err);
+    return false;
+  }
 };
