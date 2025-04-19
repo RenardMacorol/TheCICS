@@ -37,9 +37,9 @@ const Dashboard = () => {
           const newUser = new InsertNewUser();
           newUser.insertNewUser(user)
         }
-      //setRestrict(await restrictChecker(user.id))
       setUser(user);
       }
+      //setRestrict(await restrictChecker(user.id))
     }
     if(!userScannned){
     handleUser();
