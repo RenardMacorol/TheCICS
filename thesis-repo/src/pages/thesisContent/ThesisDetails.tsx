@@ -47,6 +47,8 @@ import { AddViewer } from "../../service/ContentManagement/AddThesisView";
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
     const [likes, setLikes] = useState(0);
+    const [isRestricted, setIsRestricted] = useState(false);
+
 
     useEffect(() => {
       const fetchThesisDetails = async () => {
@@ -85,6 +87,28 @@ import { AddViewer } from "../../service/ContentManagement/AddThesisView";
       };
 
       const fetchComments = async () => {
+
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+        if (userError || !user) {
+          console.error("User is not authenticated");
+          return;
+        }
+
+        // Check if the user is restricted
+        const { data: userInfo, error: userInfoError } = await supabase
+          .from("Users")
+          .select("name, commentRestricted")
+          .eq("googleAuthID", user.id)
+          .single();
+
+        if (userInfoError || !userInfo) {
+          console.error("Error fetching user info:", userInfoError?.message || "");
+          return;
+        }
+
+        setIsRestricted(userInfo.commentRestricted !== "Active");
+
         const { data, error } = await supabase
           .from("comments")
           .select("*")
@@ -119,6 +143,11 @@ import { AddViewer } from "../../service/ContentManagement/AddThesisView";
     };
 
     const handleCommentSubmit = async () => {
+      if (isRestricted) {
+        console.warn("You are restricted from commenting.");
+        return;
+      }
+    
       if (!newComment.trim()) return;
     
       // Get the authenticated user's info
@@ -244,19 +273,27 @@ import { AddViewer } from "../../service/ContentManagement/AddThesisView";
             </div>
 
             <div className="mt-4">
-              <textarea
-                className="w-full p-2 border rounded-lg"
-                placeholder="Add a comment..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-              ></textarea>
-              <button
-                onClick={handleCommentSubmit}
-                className="mt-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-              >
-                Submit Comment
-              </button>
-            </div>
+            {isRestricted ? (
+              <p className="text-red-500 font-semibold">
+                You are restricted from commenting on theses.
+              </p>
+            ) : (
+              <>
+                <textarea
+                  className="w-full p-2 border rounded-lg"
+                  placeholder="Add a comment..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                ></textarea>
+                <button
+                  onClick={handleCommentSubmit}
+                  className="mt-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                >
+                  Submit Comment
+                </button>
+              </>
+            )}
+          </div>
           </div>
         </div>
       </div>
