@@ -6,7 +6,7 @@ import CitationModal from "./CitationModal"; // Add this import for the citation
 import Thesis from "../../service/Types/Thesis";
 import { FetchAuthor } from "../../service/ContentManagement/FetchAuthors";
 import { FetchBookmarkThesis } from "../../service/ContentManagement/FetchBookMarkThesis";
-import { handleGithubButton } from "../../service/Actions/handleGithubButton";
+import { handleGithubButton } from "../../service/ContentManagement/handletGithubButton";
 
 interface Search {
     searchQuery: string;

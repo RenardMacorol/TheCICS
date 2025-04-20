@@ -7,7 +7,7 @@ import Thesis from "../../service/Types/Thesis";
 import { FetchThesisActive } from "../../service/ContentManagement/FetchThesisActive";
 import { FetchBookmark } from "../../service/ContentManagement/FetchBookmark"
 import { FetchAuthor } from "../../service/ContentManagement/FetchAuthors";
-import { handleGithubButton } from "../../service/Actions/handleGithubButton";
+import { handleGithubButton } from "../../service/ContentManagement/handletGithubButton";
 interface FilterState {
     sort: string;
     year: string;
