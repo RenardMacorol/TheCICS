@@ -16,7 +16,7 @@ interface FilterState {
 
 
 const Dashboard = () => {
-  const [userScannned, setUserScanned] = useState(false);
+  const [userScanned, setUserScanned] = useState(false);
   const [, setUser] = useState<User |null>(null);
  // const [restrict, setRestrict] = useState(false);
 
@@ -35,19 +35,19 @@ const Dashboard = () => {
         const newUserCheck = new NewUser();
         if(await newUserCheck.isNewUser(user)){
           const newUser = new InsertNewUser();
-          newUser.insertNewUser(user)
+          await newUser.insertNewUser(user)
         }
       setUser(user);
       }
       //setRestrict(await restrictChecker(user.id))
     }
-    if(!userScannned){
+    if(!userScanned){
     handleUser();
     setUserScanned(true)
     }
 
 
-  }, [userScannned]);
+  }, [userScanned]);
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
