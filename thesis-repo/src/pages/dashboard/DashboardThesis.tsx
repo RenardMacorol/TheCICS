@@ -6,7 +6,6 @@ import DashNavTop from '../../components/dashboard/DashNavTop';
 import FilterButton from "../../components/dashboard/FilterButton";
 //import restrictChecker from "../../service/UserHandler/RestrictChecker";
 import ValidUser from '../../service/UserHandler/ValidUser';
-import NewUser from "../../service/UserHandler/NewUser";
 import InsertNewUser from "../../service/UserHandler/InsertNewUser";
 interface FilterState {
   sort: string;
@@ -32,11 +31,8 @@ const Dashboard = () => {
     const {data: {user}} = await supabase.auth.getUser();
       const validUser = new ValidUser();
       if(user && await validUser.isValidUser(user)){
-        const newUserCheck = new NewUser();
-        if(await newUserCheck.isNewUser(user)){
           const newUser = new InsertNewUser();
           await newUser.insertNewUser(user)
-        }
       setUser(user);
       }
       //setRestrict(await restrictChecker(user.id))
