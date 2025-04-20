@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../service/supabase";
-import { Copy, Quote, Check, Users } from "lucide-react";
 import Thesis from "../../service/Types/Thesis";
-import { FetchBookmarkThesis } from "../../service/ContentManagement/FetchBookMarkThesis";
+import { Copy, Quote, Check, Users } from "lucide-react";
+import { CitationFormat, CitationStats, generateCitation, recordCitation } from "../../service/citation/citationUtils";
 import { FetchAuthor } from "../../service/ContentManagement/FetchAuthors";
-
+import { FetchBookmarkThesis } from "../../service/ContentManagement/FetchBookMarkThesis";
 interface Citation {
   id: string;
   userID: string;
@@ -14,23 +14,14 @@ interface Citation {
   citationText: string;
   timestamp: string;
 }
-
-interface CitationStats {
-  [thesisID: string]: {
-    uniqueUserCount: number;
-    totalCitationCount: number;
-  };
-}
-
 const CitationHistory = () => {
   const [citations, setCitations] = useState<Citation[]>([]);
   const [loading, setLoading] = useState(true);
   const [thesis, setThesis] = useState<Thesis[]>([]);
   const [authors, setAuthors] = useState<Record<string, string>>({});
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
-  const [citationStats, setCitationStats] = useState<CitationStats>({});
+  const [citationStats, setCitationStats] = useState<Record<string, CitationStats>>({});
 
-  // Memoized map for quick citationText lookup by thesisID
   const citationMap = useMemo(() => {
     const map: Record<string, string> = {};
     citations.forEach((c) => {
@@ -40,82 +31,84 @@ const CitationHistory = () => {
   }, [citations]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBookmarkedTheses = async () => {
       setLoading(true);
-      await fetchBookmarkedTheses();
-      await fetchAuthors();
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const { data: citationData, error: citationError } = await supabase
+        .from("ThesisCitationCount")
+        .select("*")
+        .eq("userID", user.id);
+
+      if (citationError) {
+        console.error("Error fetching citations:", citationError);
+        setLoading(false);
+        return;
+      }
+
+      const citationsId = citationData?.map((b) => b.thesisID) || [];
+      if (citationsId.length === 0) {
+        setCitations([]);
+        setLoading(false);
+        return;
+      }
+
+      const stats: Record<string, CitationStats> = {};
+      citationData.forEach((citation) => {
+        if (!stats[citation.thesisID]) {
+          stats[citation.thesisID] = {
+            uniqueUserCount: 0,
+            totalCitationCount: 0,
+          };
+        }
+        stats[citation.thesisID].totalCitationCount += 1;
+        stats[citation.thesisID].uniqueUserCount = 1; // Dummy for now
+      });
+      const citationFetch = new FetchBookmarkThesis(citationsId);
+      const theses = await citationFetch.fetch();
+      setThesis(theses)
+      setCitationStats(stats);
+      setCitations(citationData as Citation[]);
+      setLoading(false);
     };
 
-    fetchData();
+    const fetchAuthors = async () => {
+      const fetcher = new FetchAuthor();
+      const result = await fetcher.fetch();
+      const map: Record<string, string> = {};
+      result.forEach((author) => {
+        map[author.authorID] = `${author.firstName} ${author.lastName}`;
+      });
+      setAuthors(map);
+    };
+
+    fetchAuthors();
+    fetchBookmarkedTheses();
   }, []);
 
-  const fetchBookmarkedTheses = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    const { data: citationData, error: citationError } = await supabase
-      .from("ThesisCitationCount")
-      .select("*")
-      .eq("userID", user.id);
-
-    if (citationError) {
-      console.error("Error fetching citations:", citationError);
-      setLoading(false);
-      return;
-    }
-
-    const citationsId = citationData?.map((b) => b.thesisID) || [];
-
-    if (citationsId.length === 0) {
-      setCitations([]);
-      setLoading(false);
-      return;
-    }
-
-    const citationFetch = new FetchBookmarkThesis(citationsId);
-    const theses = await citationFetch.fetch();
-
-    const stats: CitationStats = {};
-    citationData.forEach((citation) => {
-      if (!stats[citation.thesisID]) {
-        stats[citation.thesisID] = {
-          uniqueUserCount: 0,
-          totalCitationCount: 0,
-        };
-      }
-      stats[citation.thesisID].totalCitationCount += 1;
-      stats[citation.thesisID].uniqueUserCount = 1; // Dummy for now
-    });
-
-    setCitationStats(stats);
-    setCitations(citationData as Citation[]);
-    setThesis(theses);
-    setLoading(false);
-  };
-
-  const fetchAuthors = async () => {
-    const fetcher = new FetchAuthor();
-    const result = await fetcher.fetch();
-    const map: Record<string, string> = {};
-    result.forEach((author) => {
-      map[author.authorID] = `${author.firstName} ${author.lastName}`;
-    });
-    setAuthors(map);
-  };
-
-  const handleCopy = async (citationId: string, text: string) => {
+  const handleCopy = async (citationId: string, thesisID: string, format: CitationFormat) => {
     try {
-      await navigator.clipboard.writeText(text);
+      const itemThesis = thesis.find((t) => t.thesisID === thesisID)
+      if(!itemThesis){
+        return;
+      }
+      const citationText = generateCitation(itemThesis, format); // Generate citation using the utility
+      await navigator.clipboard.writeText(citationText);
       setCopiedStates((prev) => ({ ...prev, [citationId]: true }));
       setTimeout(() => {
         setCopiedStates((prev) => ({ ...prev, [citationId]: false }));
       }, 2000);
+
+      // Record the citation action
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        recordCitation(thesisID, user.id, 'citation', format);
+      }
     } catch (err) {
       console.error("Failed to copy citation:", err);
     }
@@ -157,7 +150,6 @@ const CitationHistory = () => {
                   • Published {item.publicationYear || "Unknown"}
                 </p>
 
-                {/* Use citation from citationMap */}
                 <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-3 rounded-md mb-2">
                   {citationMap[item.thesisID] || "No citation available"}
                 </p>
@@ -183,15 +175,10 @@ const CitationHistory = () => {
 
                 <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                   <span>
-                    {citations.find((c) => c.thesisID === item.thesisID)?.citationFormat?.toUpperCase() ||
-                      "Link"}{" "}
-                    • Cited on{" "}
-                    {new Date(
-                      citations.find((c) => c.thesisID === item.thesisID)?.timestamp || ""
-                    ).toLocaleString() || "N/A"}
+                    {citationStats[item.thesisID]?.uniqueUserCount || 0} unique users
                   </span>
                   <button
-                    onClick={() => handleCopy(item.thesisID, citationMap[item.thesisID])}
+                    onClick={() => handleCopy(item.thesisID, item.thesisID, 'apa')}
                     className={`flex items-center gap-1 px-3 py-1 rounded-md text-sm font-medium transition-all ${
                       copiedStates[item.thesisID]
                         ? "bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200"
