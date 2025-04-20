@@ -48,7 +48,7 @@ const CitationHistoryPage = () => {
           ))}
         </div>
 
-        <CitationHistory searchQuery={searchQuery} selectedFormat={selectedFormat} />
+        <CitationHistory  />
       </div>
     </div>
   );
