@@ -190,7 +190,7 @@ const filteredAndSortedTheses = theses
     if (error) {
       console.error("Error fetching comments:", error.message); 
     } else if (data) {
-      const normalized = data.map((item: any) => ({
+      const normalized: CommentRecord[] = data.map((item: any) => ({
         commentID: item.commentID,
         userID: item.userid, 
         thesisID: item.thesisID,
@@ -199,10 +199,10 @@ const filteredAndSortedTheses = theses
         createdAt: item.createdAt,
         Users: {
           name: item.Users.name,
-          commentRestricted: item.Users.commentRestricted,
+          commentRestricted: item.Users.commentRestricted === 'Restricted' ? 'Restricted' : 'Active',
         },
       }));
-      setComments(normalized);
+      setComments(normalized); 
     }
     setLoadingComments(false);
   };
@@ -224,17 +224,8 @@ const filteredAndSortedTheses = theses
   if (error) {
     console.error('Error updating comment restriction:', error.message);
   } else {
-    setComments(prevComments => 
-      prevComments.map(comment =>
-        comment.userID === row.userID
-          ? {
-              ...comment,
-              Users: { ...comment.Users, commentRestricted: newStatus }
-            }
-          : comment
-      )
-    );
-    
+    await fetchComments(); 
+    await fetchData(); // Optional code I just added/can be removed.
   }
 };
 
@@ -487,34 +478,36 @@ return (
         </tr>
       </thead>
       <tbody>
-        {comments.map((comment) => (
-          <tr key={comment.commentID} className="border-t">
-            <td className="px-4 py-2">{comment.content}</td>
-            <td className="px-4 py-2">{comment.Users?.name}</td>
-            <td className="px-4 py-2">{comment.thesisID}</td>
-            <td className="px-4 py-2">{new Date(comment.createdAt).toLocaleString()}</td>
-            <td className="px-4 py-2">
-              {comment.Users?.commentRestricted ? ( 
-                <span className="text-red-600 font-semibold">Restricted</span>
-              ) : (
-                <span className="text-green-600 font-semibold">Allowed</span>
-              )}
-            </td>
-            <td className="px-4 py-2">
-            <button
-                className={`px-3 py-1 rounded ${
-                  comment.Users?.commentRestricted === "Restricted"
-                    ? "bg-green-500 hover:bg-green-600"
-                    : "bg-red-500 hover:bg-red-600"
-                } text-white`}
-                onClick={() => toggleRestriction(comment)}
-              >
-                {comment.Users?.commentRestricted === "Restricted" ? "Unrestrict" : "Restrict"}
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
+  {comments.map((comment) => (
+    <tr key={comment.commentID} className="border-t">
+      <td className="px-4 py-2">{comment.content}</td>
+      <td className="px-4 py-2">{comment.Users?.name}</td>
+      <td className="px-4 py-2">{comment.thesisID}</td>
+      <td className="px-4 py-2">{new Date(comment.createdAt).toLocaleString()}</td>
+      <td className="px-4 py-2">
+        {comment.Users?.commentRestricted === "Restricted" ? (
+          <span className="text-red-600 font-semibold">Restricted</span>
+        ) : (
+          <span className="text-green-600 font-semibold">Allowed</span>
+        )}
+      </td>
+      <td className="px-4 py-2">
+        <button
+          className={`px-3 py-1 rounded ${
+            comment.Users?.commentRestricted === "Restricted"
+              ? "bg-green-500 hover:bg-green-600"
+              : "bg-red-500 hover:bg-red-600"
+          } text-white`}
+          onClick={() => toggleRestriction(comment)}
+        >
+          {comment.Users?.commentRestricted === "Restricted"
+            ? "Unrestrict"
+            : "Restrict"}
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
     </table>
   )}
 </div>
