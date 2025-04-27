@@ -47,6 +47,10 @@ import { AddViewer } from "../../service/ContentManagement/AddThesisView";
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
     const [likes, setLikes] = useState(0);
+    const [isRestricted, setIsRestricted] = useState(false);
+    const [hasLiked, setHasLiked] = useState(false);
+
+
 
     useEffect(() => {
       const fetchThesisDetails = async () => {
@@ -58,40 +62,56 @@ import { AddViewer } from "../../service/ContentManagement/AddThesisView";
           `)
           .eq("thesisID", thesisID)
           .single();
-
+    
         if (error) {
           console.error("Error fetching thesis details:", error);
         } else {
           const author = data.Author && Array.isArray(data.Author) ? data.Author[0] : data.Author;
-          const thesis =({
+          const thesis = ({
             ...data,
             authorName: author ? `${author.firstName} ${author.lastName}` : "Unknown Author",
           });
-
-          const user = await supabase.auth.getUser()
-          if(user.data.user?.id){
-          const count = await AddViewer(user.data?.user.id, thesis.thesisID)
-          setThesis({
-            ...thesis,
-            views: count ?? 0,
-          })
+    
+          const user = await supabase.auth.getUser();
+          if (user.data.user?.id) {
+            const count = await AddViewer(user.data.user.id, thesis.thesisID);
+            setThesis({
+              ...thesis,
+              views: count ?? 0,
+            });
           }
-
-          
-
         }
-
         setLoading(false);
       };
-
+    
       const fetchComments = async () => {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+        if (userError || !user) {
+          console.error("User is not authenticated");
+          return;
+        }
+    
+        // Check if the user is restricted
+        const { data: userInfo, error: userInfoError } = await supabase
+          .from("Users")
+          .select("name, commentRestricted")
+          .eq("googleAuthID", user.id)
+          .single();
+    
+        if (userInfoError || !userInfo) {
+          console.error("Error fetching user info:", userInfoError?.message || "");
+          return;
+        }
+    
+        setIsRestricted(userInfo.commentRestricted !== "Active");
+    
         const { data, error } = await supabase
           .from("comments")
           .select("*")
           .eq("thesisID", thesisID)
           .order("createdAt", { ascending: false });
-
-
+    
         if (error) {
           console.error("Error fetching comments:", error);
         } else {
@@ -99,26 +119,73 @@ import { AddViewer } from "../../service/ContentManagement/AddThesisView";
           setComments(data);
         }
       };
-
-               
-
+    
+      const loadLikes = async () => {
+        // Fetch the count of likes sa table
+        const { count, error: countError } = await supabase
+          .from("like")
+          .select("*", { count: "exact", head: true })
+          .eq("thesisID", thesisID);
+      
+        if (!countError && count !== null) {
+          setLikes(count); 
+        }
+      
+        // Check if the current user has liked
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id) {
+          const { count: userLikeCount, error: userLikeError } = await supabase
+            .from("like")
+            .select("*", { count: "exact", head: true })
+            .eq("thesisID", thesisID)
+            .eq("user_id", user.id);
+      
+          if (!userLikeError && userLikeCount !== null) {
+            setHasLiked(userLikeCount > 0);
+          }
+        }
+      };
+      
+    
       if (thesisID) {
         fetchThesisDetails();
         fetchComments();
+        loadLikes(); 
       }
     }, [thesisID]);
 
     const handleLike = async () => {
-      const updatedLikes = likes + 1;
-      setLikes(updatedLikes);
-
-      await supabase
-        .from("Thesis")
-        .update({ likes: updatedLikes })
-        .eq("thesisID", thesisID);
+      const { data: { user }, error } = await supabase.auth.getUser();
+    
+      if (error || !user) {
+        console.error("User not authenticated");
+        return;
+      }
+    
+      if (!hasLiked) {
+        const { error: likeError } = await supabase
+          .from("like")
+          .insert([{ thesisID: thesisID, user_id: user.id }]);
+        
+        if (likeError) {
+          console.error("Error liking thesis:", likeError);
+        } else {
+          setLikes((prev) => prev + 1);
+          setHasLiked(true);
+        }
+      } else {
+        console.warn("You already liked this thesis.");
+      }
     };
+    
+    
 
     const handleCommentSubmit = async () => {
+      if (isRestricted) {
+        console.warn("You are restricted from commenting.");
+        return;
+      }
+    
       if (!newComment.trim()) return;
     
       // Get the authenticated user's info
@@ -209,8 +276,8 @@ import { AddViewer } from "../../service/ContentManagement/AddThesisView";
             onClick={handleLike}
             className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
           >
-            Like ❤️ ({likes})
-          </button>
+            Like ❤️ ({likes})  
+          </button> 
 
           <div className="mt-6">
             <h2 className="text-lg font-semibold">Comments</h2>
@@ -244,19 +311,27 @@ import { AddViewer } from "../../service/ContentManagement/AddThesisView";
             </div>
 
             <div className="mt-4">
-              <textarea
-                className="w-full p-2 border rounded-lg"
-                placeholder="Add a comment..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-              ></textarea>
-              <button
-                onClick={handleCommentSubmit}
-                className="mt-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-              >
-                Submit Comment
-              </button>
-            </div>
+            {isRestricted ? (
+              <p className="text-red-500 font-semibold">
+                You are restricted from commenting on theses.
+              </p>
+            ) : (
+              <>
+                <textarea
+                  className="w-full p-2 border rounded-lg"
+                  placeholder="Add a comment..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                ></textarea>
+                <button
+                  onClick={handleCommentSubmit}
+                  className="mt-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                >
+                  Submit Comment
+                </button>
+              </>
+            )}
+          </div>
           </div>
         </div>
       </div>
