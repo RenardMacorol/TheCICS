@@ -1,4 +1,4 @@
-import { Bell, CircleHelp, LogOut, Search, Settings, MoonStar, User, BookMarked, Bookmark, Lightbulb, ChevronLeft, Quote } from "lucide-react";
+import { CircleHelp, LogOut, Search, Settings, MoonStar, User, BookMarked, Bookmark, Lightbulb, ChevronLeft, Quote } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "../../service/supabase"; 
@@ -11,18 +11,18 @@ type Notification = {
   read: boolean;
 };
 
-interface Search {
+interface SearchProp {
   setSearchQuery: (query: string) => void;
   searchQuery: string;
 }
 
-const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
+const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
   const navigate = useNavigate();
   const [isSideBarOpen, setSideBarOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  //const [unreadCount, setUnreadCount] = useState(0);
   const [userName, setUserName] = useState("");
   const [userRole, setUserRole] = useState<string | null>(null);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
@@ -54,7 +54,7 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
 
         if (!error && data) {
           setNotifications(data);
-          setUnreadCount(data.filter(n => !n.read).length);
+          //setUnreadCount(data.filter(n => !n.read).length);
         }
       }
     };

@@ -51,7 +51,7 @@ const Dashboard = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen text-white">
-    <DashNavTop setSearchQuery={setSearchQuery} searchQuery={""}/>
+    <DashNavTop setSearchQuery={setSearchQuery} searchQuery={searchQuery}/>
     <FilterButton onFilterChange={handleFilterChange}/>
     {restrict ? 
     <p className="flex justify-center items-center font-bold text-5xl text-blue-500">You Are Restricted to this page Please Contact Support -Wonka</p> 
