@@ -1,7 +1,8 @@
+// AdminNavTop.tsx
 import React, { useState, useEffect } from "react";
 import { Menu, ChevronLeft, Users, Files, UploadCloud, ArrowLeft, User, Bell, LogOut, Settings, MoonStar, CircleHelp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../../service/supabase"; 
+import { supabase } from "../../service/supabase";
 import Logout from "../../service/auth/Logout";
 
 type Notification = {
@@ -271,19 +272,37 @@ const AdminNavTop: React.FC<AdminNavTopProps> = ({ userName: propUserName }) => 
 
           <ul className="space-y-2">
             <li>
-              <button className="w-full p-2 flex items-center rounded-md hover:bg-gray-800">
+              <button
+                className="w-full p-2 flex items-center rounded-md hover:bg-gray-800"
+                onClick={() => {
+                  navigate("/admin/user-management");
+                  setSidebarOpen(false);
+                }}
+              >
                 <Users className="w-5 h-5 mr-3 text-aqua-400" />
                 User Management
               </button>
             </li>
             <li>
-              <button className="w-full p-2 flex items-center rounded-md hover:bg-gray-800">
+              <button
+                className="w-full p-2 flex items-center rounded-md hover:bg-gray-800"
+                onClick={() => {
+                  navigate("/admin/thesis-management");
+                  setSidebarOpen(false);
+                }}
+              >
                 <Files className="w-5 h-5 mr-3 text-aqua-400" />
                 Thesis Management
               </button>
             </li>
             <li>
-              <button className="w-full p-2 flex items-center rounded-md hover:bg-gray-800">
+              <button
+                className="w-full p-2 flex items-center rounded-md hover:bg-gray-800"
+                onClick={() => {
+                  navigate("/admin/thesis-upload");
+                  setSidebarOpen(false);
+                }}
+              >
                 <UploadCloud className="w-5 h-5 mr-3 text-aqua-400" />
                 Thesis Upload
               </button>
