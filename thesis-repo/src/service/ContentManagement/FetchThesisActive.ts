@@ -3,6 +3,7 @@ import { supabase } from "../supabase";
 import { Fetchable } from "../Types/Fetchable";
 import Thesis from '../Types/Thesis';
 import { countCommentByThesisID } from "./FetchCountComment";
+import { CountLikeByThesisID } from "./FetchCountLikes";
 import { CountViewByThesisID } from "./FetchCountView";
 
 export class FetchThesisActive  extends ThesisBase implements Fetchable<Thesis>{
@@ -19,15 +20,18 @@ export class FetchThesisActive  extends ThesisBase implements Fetchable<Thesis>{
 
         const counterComment = new countCommentByThesisID();
         const counterView = new CountViewByThesisID();
+        const counterLike = new CountLikeByThesisID();
 
         const thesesCountStats = await Promise.all(
             thesesData.map(async (thesis) => {
                 const commentCount = await counterComment.fetchCount(thesis.thesisID);
                 const viewCount = await counterView.fetchCount(thesis.thesisID);
+                const likeCount = await counterLike.fetchCount(thesis.thesisID) 
                 return {
                     ...thesis,
                     comments : commentCount ?? 0,// adds a new property
-                    views : viewCount ?? 0// adds a new property
+                    views : viewCount ?? 0,// adds a new property
+                    likes : likeCount ?? 0
                 };
             })
         );
