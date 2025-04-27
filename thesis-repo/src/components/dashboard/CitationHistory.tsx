@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../service/supabase";
 import Thesis from "../../service/Types/Thesis";
-import { Copy, Quote, Check, Users } from "lucide-react";
-import { CitationFormat, CitationStats, generateCitation, recordCitation } from "../../service/citation/citationUtils";
+import { Copy, Quote } from "lucide-react";
+import { CitationFormat, generateCitation, recordCitation } from "../../service/citation/citationUtils";
 import { FetchAuthor } from "../../service/ContentManagement/FetchAuthors";
 import { FetchBookmarkThesis } from "../../service/ContentManagement/FetchBookMarkThesis";
+
 interface Citation {
   id: string;
   userID: string;
@@ -14,13 +15,14 @@ interface Citation {
   citationText: string;
   timestamp: string;
 }
+
 const CitationHistory = () => {
   const [citations, setCitations] = useState<Citation[]>([]);
   const [loading, setLoading] = useState(true);
   const [thesis, setThesis] = useState<Thesis[]>([]);
   const [authors, setAuthors] = useState<Record<string, string>>({});
-  const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
-  const [citationStats, setCitationStats] = useState<Record<string, CitationStats>>({});
+  const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
+  const [copiedFormat, setCopiedFormat] = useState<CitationFormat | null>(null);
 
   const citationMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -58,21 +60,9 @@ const CitationHistory = () => {
         return;
       }
 
-      const stats: Record<string, CitationStats> = {};
-      citationData.forEach((citation) => {
-        if (!stats[citation.thesisID]) {
-          stats[citation.thesisID] = {
-            uniqueUserCount: 0,
-            totalCitationCount: 0,
-          };
-        }
-        stats[citation.thesisID].totalCitationCount += 1;
-        stats[citation.thesisID].uniqueUserCount = 1; // Dummy for now
-      });
       const citationFetch = new FetchBookmarkThesis(citationsId);
       const theses = await citationFetch.fetch();
-      setThesis(theses)
-      setCitationStats(stats);
+      setThesis(theses);
       setCitations(citationData as Citation[]);
       setLoading(false);
     };
@@ -91,27 +81,31 @@ const CitationHistory = () => {
     fetchBookmarkedTheses();
   }, []);
 
-  const handleCopy = async (citationId: string, thesisID: string, format: CitationFormat) => {
+  const handleCopy = async (thesis: Thesis, format: CitationFormat) => {
     try {
-      const itemThesis = thesis.find((t) => t.thesisID === thesisID)
-      if(!itemThesis){
-        return;
-      }
-      const citationText = generateCitation(itemThesis, format); // Generate citation using the utility
+      const citationText = generateCitation(thesis, format);
       await navigator.clipboard.writeText(citationText);
-      setCopiedStates((prev) => ({ ...prev, [citationId]: true }));
+      setCopiedFormat(format);
       setTimeout(() => {
-        setCopiedStates((prev) => ({ ...prev, [citationId]: false }));
+        setCopiedFormat(null);
       }, 2000);
 
-      // Record the citation action
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        recordCitation(thesisID, user.id, 'citation', format);
+        recordCitation(thesis.thesisID, user.id, 'citation', format);
       }
     } catch (err) {
       console.error("Failed to copy citation:", err);
     }
+  };
+
+  const openCitationModal = (thesis: Thesis) => {
+    setSelectedThesis(thesis);
+  };
+
+  const closeCitationModal = () => {
+    setSelectedThesis(null);
+    setCopiedFormat(null);
   };
 
   if (loading) {
@@ -150,47 +144,19 @@ const CitationHistory = () => {
                   • Published {item.publicationYear || "Unknown"}
                 </p>
 
-                <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-3 rounded-md mb-2">
-                  {citationMap[item.thesisID] || "No citation available"}
-                </p>
-
-                {citationStats[item.thesisID] && (
-                  <div className="flex items-center gap-2 mb-2 text-sm text-gray-500 dark:text-gray-400">
-                    <Users size={14} />
-                    <span>
-                      {citationStats[item.thesisID].uniqueUserCount} unique{" "}
-                      {citationStats[item.thesisID].uniqueUserCount === 1
-                        ? "user has"
-                        : "users have"}{" "}
-                      cited this thesis
-                    </span>
-                    <span>
-                      • {citationStats[item.thesisID].totalCitationCount} total{" "}
-                      {citationStats[item.thesisID].totalCitationCount === 1
-                        ? "citation"
-                        : "citations"}
-                    </span>
-                  </div>
+                {citationMap[item.thesisID] && (
+                  <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-3 rounded-md mb-2">
+                    {citationMap[item.thesisID]}
+                  </p>
                 )}
 
-                <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                  <span>
-                    {citationStats[item.thesisID]?.uniqueUserCount || 0} unique users
-                  </span>
+                <div className="flex items-center justify-end text-sm text-gray-500 dark:text-gray-400">
                   <button
-                    onClick={() => handleCopy(item.thesisID, item.thesisID, 'apa')}
-                    className={`flex items-center gap-1 px-3 py-1 rounded-md text-sm font-medium transition-all ${
-                      copiedStates[item.thesisID]
-                        ? "bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200"
-                        : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-200 dark:hover:bg-indigo-800/60"
-                    }`}
+                    onClick={() => openCitationModal(item)}
+                    className="flex items-center gap-1 px-3 py-1 rounded-md text-sm font-medium transition-all bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-200 dark:hover:bg-indigo-800/60"
                   >
-                    {copiedStates[item.thesisID] ? (
-                      <Check size={14} className="animate-pulse" />
-                    ) : (
-                      <Copy size={14} />
-                    )}
-                    <span>{copiedStates[item.thesisID] ? "Copied!" : "Copy"}</span>
+                    <Copy size={14} />
+                    <span>Copy</span>
                   </button>
                 </div>
               </div>
@@ -206,6 +172,50 @@ const CitationHistory = () => {
           <p className="text-gray-500 dark:text-gray-400 mt-1">
             Citations you copy will appear here
           </p>
+        </div>
+      )}
+
+        {selectedThesis && (
+        <div className="fixed inset-0 bg-opacity-40 backdrop-blur-lg flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                Citation Options
+              </h3>
+              <button onClick={closeCitationModal} className="text-gray-500 dark:text-gray-300">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex gap-2 mb-4">
+              {["apa", "mla", "chicago"].map((format) => (
+                <button
+                  key={format}
+                  onClick={() => handleCopy(selectedThesis, format as CitationFormat)}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                    copiedFormat === format
+                      ? "bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200"
+                      : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-200 dark:hover:bg-indigo-800/60"
+                  }`}
+                >
+                  {copiedFormat === format ? "Copied!" : format.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
+            <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-3 rounded-md mb-4">
+              {generateCitation(selectedThesis, copiedFormat || "apa")}
+            </p>
+
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Retrieved on {new Date().toLocaleDateString()}
+            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              Citation formats may vary slightly depending on specific requirements
+            </p>
+          </div>
         </div>
       )}
     </div>
