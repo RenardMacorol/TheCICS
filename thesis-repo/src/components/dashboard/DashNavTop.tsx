@@ -81,7 +81,8 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
     console.log('User Logout Success');
   };
 
-  const markNotificationsAsRead = async () => {
+  {/*
+    const markNotificationsAsRead = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase
@@ -96,8 +97,8 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
       setUnreadCount(0);
     }
   };
-
-  const navigateToHome = () => {
+  */}
+    const navigateToHome = () => {
     navigate('/');
   };
 
@@ -107,7 +108,8 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
   };
 
   // Handler for toggling notifications dropdown
-  const handleNotificationsToggle = () => {
+  {/* 
+   const handleNotificationsToggle = () => {
     setNotificationsOpen(prev => !prev);
     setProfileOpen(false); // Close profile dropdown when notifications are toggled
     if (!isNotificationsOpen && unreadCount > 0) {
@@ -115,7 +117,8 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
     }
   };
 
-  // Handler for toggling profile dropdown
+  */}
+    // Handler for toggling profile dropdown
   const handleProfileToggle = () => {
     setProfileOpen(prev => !prev);
     setNotificationsOpen(false); // Close notifications dropdown when profile is toggled
@@ -149,9 +152,7 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
           className="ml-2 outline-none bg-transparent text-white placeholder-violet-300 w-full"
         />
       </div>
-
-      <div className="flex gap-4 items-center">
-        <div className="relative">
+{/*
           <button
             onClick={handleNotificationsToggle} // Use the new handler
             className="relative p-1.5 hover:bg-violet-700 rounded-full transition-colors"
@@ -163,7 +164,9 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: Search) => {
               </span>
             )}
           </button>
-
+*/}
+      <div className="flex gap-4 items-center">
+        <div className="relative">
           {isNotificationsOpen && (
             <div className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-md overflow-hidden z-10">
               <div className="bg-violet-800 text-white p-3 font-medium flex justify-between items-center">
