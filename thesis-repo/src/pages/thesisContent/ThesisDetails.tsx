@@ -4,6 +4,7 @@
   import DashNavTop from '../../components/dashboard/DashNavTop';
   import FilterButton from "../../components/dashboard/FilterButton";
 import { AddViewer } from "../../service/ContentManagement/AddThesisView";
+import LoadingThesisDetails from "../../components/global/LoadingThesisDetails";
 
   type Author = {
     firstName: string;
@@ -236,7 +237,7 @@ import { AddViewer } from "../../service/ContentManagement/AddThesisView";
     
     
 
-    if (loading) return <div className="text-center p-10">Loading thesis details...</div>;
+    if (loading) return <div className="text-center"><LoadingThesisDetails /></div>;
 
     if (!thesis) return <div className="text-center p-10">Thesis not found.</div>;
 
