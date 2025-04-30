@@ -10,6 +10,7 @@ import BookmarkedTheses from './pages/bookmark/BookmarkedTheses';
 import CitationHistoryPage from './pages/history/CitationHistoryPage';
 import LandingPage from './pages/landingPage/LandingPage';
 import StudentProfile from './pages/profile/StudentProfile';
+import LoadingScreen from './components/global/LoadingScreen';
 
 
 const App = () => {
@@ -43,7 +44,7 @@ const App = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Prevents redirection before user state is set
+    return <LoadingScreen />; // Prevents redirection before user state is set // will add loading animation here
   }
 
   return (
