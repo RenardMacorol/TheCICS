@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Copy, X, Check, BookOpen, Users } from 'lucide-react'; // removed Link as LinkIcon import muna
+import { Copy, X, Check, BookOpen, Users, Sparkles } from 'lucide-react'; // removed Link as LinkIcon import muna
 import { supabase } from "../../service/supabase";
 import {
   CitationModalProps,
@@ -23,7 +23,8 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
   const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
   const [citationStats, setCitationStats] = useState<CitationStats>({
     uniqueUserCount: 0,
-    totalCitationCount: 0
+    totalCitationCount: 0,
+    hasUserCited: false
   });
   
   // Fetch current user on component mount
@@ -42,9 +43,9 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
   const fetchCitationStats = useCallback(async () => {
     if (!thesis?.thesisID || !isOpen) return;
     
-    const stats = await fetchStats(thesis.thesisID);
+    const stats = await fetchStats(thesis.thesisID, currentUser?.id || null);
     setCitationStats(stats);
-  }, [thesis?.thesisID, isOpen]);
+  }, [thesis?.thesisID, isOpen, currentUser?.id]);
   
   useEffect(() => {
     if (thesis?.thesisID && isOpen) {
@@ -139,6 +140,16 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
               {citationStats.totalCitationCount} total {citationStats.totalCitationCount === 1 ? 'citation' : 'citations'}
             </span>
           </div>
+
+          {/* User has cited notification - NEW COMPONENT */}
+          {citationStats.hasUserCited && (
+             <div className="flex items-center gap-2 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 animate-fadeIn">
+               <Sparkles size={16} className="text-yellow-500 dark:text-yellow-400" />
+               <p className="text-sm">
+                 You've already cited this thesis! 🤯
+               </p>
+             </div>
+           )}
           
           {/* Format Selection Tabs */}
           <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">

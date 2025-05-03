@@ -9,10 +9,15 @@ import BookmarkedTheses from './pages/bookmark/BookmarkedTheses';
 import CitationHistoryPage from './pages/history/CitationHistoryPage';
 import LandingPage from './pages/landingPage/LandingPage';
 import StudentProfile from './pages/profile/StudentProfile';
+
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagementPage from "./pages/admin/UserManagementPage"; // Fixed typo: UserManagemetPage -> UserManagementPage
 import ThesisManagementPage from "./pages/admin/ThesisManagementPage";
 import ThesisUploadPage from "./pages/admin/ThesisUploadPage";
+
+import LoadingScreen from './components/global/LoadingScreen';
+
+
 
 const App = () => {
   const [user, setUser] = useState<any>(null);
@@ -45,7 +50,9 @@ const App = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+
+    return <LoadingScreen />; // Prevents redirection before user state is set // will add loading animation here
+
   }
 
   return (

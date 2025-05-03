@@ -297,14 +297,18 @@ const ContentList = ({ searchQuery, filters }: ContentListProps) => {
                        {/* Action Buttons */}
                        <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
                         <div className="flex items-center gap-2">
-                            <button className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm">
+                            {/* 
+                             <button className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm">
                                 <ThumbsUp size={16} />
                                 <span>Like</span>
                             </button>
-                            <button className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm">
+                           <button className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm">
                                 <MessageSquare size={16} />
                                 <span>Comment</span>
                             </button>
+
+                            
+                            */}
                             <button 
                                 onClick={() => handleShareClick(item)}
                                 className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm"
