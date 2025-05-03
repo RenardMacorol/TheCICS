@@ -4,13 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from "../../service/supabase"; 
 import Logout from "../../service/auth/Logout";
 
-type Notification = {
-  id: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-};
-
 interface SearchProp {
   setSearchQuery: (query: string) => void;
   searchQuery: string;
@@ -20,9 +13,6 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
   const navigate = useNavigate();
   const [isSideBarOpen, setSideBarOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
-  const [isNotificationsOpen, setNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  //const [unreadCount, setUnreadCount] = useState(0);
   const [userName, setUserName] = useState("");
   const [userRole, setUserRole] = useState<string | null>(null);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
@@ -43,20 +33,7 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
             
           }
 
-
-        // Fetch notifications
-        const { data, error } = await supabase
-          .from("UserNotifications")
-          .select("*")
-          .eq('userID', user.id)
-          .order('timestamp', { ascending: false })
-          .limit(5);
-
-        if (!error && data) {
-          setNotifications(data);
-          //setUnreadCount(data.filter(n => !n.read).length);
-        }
-      }
+     }
     };
 
     fetchUserData();
@@ -81,23 +58,7 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
     console.log('User Logout Success');
   };
 
-  {/*
-    const markNotificationsAsRead = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase
-        .from("UserNotifications")
-        .update({ read: true })
-        .eq('userID', user.id)
-        .eq('read', false);
-
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, read: true }))
-      );
-      setUnreadCount(0);
-    }
-  };
-  */}
+  
     const navigateToHome = () => {
     navigate('/');
   };
@@ -107,21 +68,8 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
     setSideBarOpen(false);
   };
 
-  // Handler for toggling notifications dropdown
-  {/* 
-   const handleNotificationsToggle = () => {
-    setNotificationsOpen(prev => !prev);
-    setProfileOpen(false); // Close profile dropdown when notifications are toggled
-    if (!isNotificationsOpen && unreadCount > 0) {
-      markNotificationsAsRead();
-    }
-  };
-
-  */}
-    // Handler for toggling profile dropdown
-  const handleProfileToggle = () => {
+    const handleProfileToggle = () => {
     setProfileOpen(prev => !prev);
-    setNotificationsOpen(false); // Close notifications dropdown when profile is toggled
   };
 
   return (
@@ -166,43 +114,7 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
           </button>
 */}
       <div className="flex gap-4 items-center">
-        <div className="relative">
-          {isNotificationsOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-md overflow-hidden z-10">
-              <div className="bg-violet-800 text-white p-3 font-medium flex justify-between items-center">
-                <span>Notifications</span>
-                <button className="text-xs text-violet-200 hover:text-white">
-                  Mark all as read
-                </button>
-              </div>
-              <div className="max-h-80 overflow-y-auto">
-                {notifications.length > 0 ? (
-                  notifications.map(notification => (
-                    <div
-                      key={notification.id}
-                      className={`p-3 border-b ${notification.read ? 'bg-white' : 'bg-violet-50'}`}
-                    >
-                      <p className="text-gray-800 text-sm">{notification.message}</p>
-                      <p className="text-gray-500 text-xs mt-1">
-                        {new Date(notification.timestamp).toLocaleString()}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-6 text-center text-gray-500">
-                    No notifications
-                  </div>
-                )}
-              </div>
-              <div className="bg-gray-50 p-2 text-center">
-                <button className="text-violet-600 text-sm hover:text-violet-800">
-                  View all notifications
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
+        
         <div className="relative">
           <button
             onClick={handleProfileToggle} // Use the new handler
@@ -319,15 +231,7 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
           </div>
 
           <ul className="space-y-1">
-            <li>
-              <button
-                className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800"
-              >
-                <BookMarked className="w-5 h-5 mr-3 text-cyan-400" />
-                <span>My Theses</span>
-              </button>
-            </li>
-            <li>
+           <li>
               <button
                 className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800"
                 onClick={navigateToBookmarked}
@@ -348,43 +252,8 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
                 <span>Citation History</span>
                 </button>
             </li>
-            <li>
-              <button className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800">
-                <Lightbulb className="w-5 h-5 mr-3 text-cyan-400" />
-                <span>Recommendations</span>
-              </button>
-            </li>
+          
           </ul>
-
-          <div className="mt-6 pt-6 border-t border-gray-700">
-            <h3 className="text-xs font-medium text-gray-400 px-2 mb-2">CATEGORIES</h3>
-            <ul className="space-y-1">
-              <li>
-                <button className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800">
-                  <span className="mr-3">🧠</span>
-                  <span>Artificial Intelligence</span>
-                </button>
-              </li>
-              <li>
-                <button className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800">
-                  <span className="mr-3">🔒</span>
-                  <span>Cybersecurity</span>
-                </button>
-              </li>
-              <li>
-                <button className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800">
-                  <span className="mr-3">📱</span>
-                  <span>Mobile Development</span>
-                </button>
-              </li>
-              <li>
-                <button className="w-full p-2 flex items-center text-left rounded-md hover:bg-gray-800">
-                  <span className="mr-3">⛓️</span>
-                  <span>Blockchain</span>
-                </button>
-              </li>
-            </ul>
-          </div>
         </div>
       </aside>
 
