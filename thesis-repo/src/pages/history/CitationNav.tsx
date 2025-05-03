@@ -1,15 +1,12 @@
-import {  LogOut, Search,  User,  Bookmark,  ChevronLeft, Quote } from "lucide-react";
+import {  LogOut, User,  Bookmark,  ChevronLeft, Quote } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "../../service/supabase"; 
 import Logout from "../../service/auth/Logout";
 
-interface SearchProp {
-  setSearchQuery: (query: string) => void;
-  searchQuery: string;
-}
 
-const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
+
+const CitationNav = () => {
   const navigate = useNavigate();
   const [isSideBarOpen, setSideBarOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
@@ -90,17 +87,7 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
         </div>
       </div>
 
-      <div className="flex items-center bg-violet-700 px-4 py-2 rounded-lg border border-violet-600 w-1/3 max-w-md">
-        <Search className="w-5 h-5 text-violet-300"/>
-        <input
-          type="text"
-          placeholder="Search theses..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="ml-2 outline-none bg-transparent text-white placeholder-violet-300 w-full"
-        />
-      </div>
-     <div className="flex gap-4 items-center">
+        <div className="flex gap-4 items-center">
         
         <div className="relative">
           <button
@@ -240,4 +227,4 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
   );
 };
 
-export default DashNavTop;
+export default CitationNav;

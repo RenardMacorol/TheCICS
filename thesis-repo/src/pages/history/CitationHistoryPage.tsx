@@ -1,13 +1,10 @@
-import { useState } from "react";
 import CitationHistory from "../../components/dashboard/CitationHistory";
-import DashNavTop from "../../components/dashboard/DashNavTop";
+import CitationNav from './CitationNav';
 
 const CitationHistoryPage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <DashNavTop setSearchQuery={setSearchQuery} searchQuery={searchQuery} />
+      <CitationNav/>
       
       <div className="container mx-auto pt-6">
         <div className="px-6 mb-6">

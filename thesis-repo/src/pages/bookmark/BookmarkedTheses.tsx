@@ -1,14 +1,14 @@
 import { useState } from "react";
 import BookmarkList from "../../components/dashboard/BookmarkList";
-import DashNavTop from "../../components/dashboard/DashNavTop";
-import FilterButton from "../../components/dashboard/FilterButton";
+import BookmarkNavTop from "./BookmarkNavTop";
 
 const BookmarkedTheses = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <DashNavTop setSearchQuery={setSearchQuery} searchQuery={""} />
+      <BookmarkNavTop setSearchQuery={setSearchQuery} searchQuery={searchQuery} />
       
       <div className="container mx-auto pt-6">
         <div className="px-6 mb-6">
@@ -16,7 +16,6 @@ const BookmarkedTheses = () => {
           <p className="text-gray-600 dark:text-gray-300">Your collection of saved research papers</p>
         </div>
         
-        <FilterButton />
         <BookmarkList searchQuery={searchQuery} />
       </div>
     </div>

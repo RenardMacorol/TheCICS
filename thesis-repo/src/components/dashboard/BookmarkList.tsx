@@ -12,6 +12,7 @@ interface Search {
     searchQuery: string;
 }
 
+
 const BookmarkList = ({ searchQuery }: Search) => {
     const [bookmarkedTheses, setBookmarkedTheses] = useState<Thesis[]>([]);
     const [expandedAbstracts, setExpandedAbstracts] = useState<Record<string, boolean>>({});
