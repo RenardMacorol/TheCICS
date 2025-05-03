@@ -1,16 +1,11 @@
 // AdminNavTop.tsx
 import React, { useState, useEffect } from "react";
-import { Menu, ChevronLeft, Users, Files, UploadCloud, ArrowLeft, User, Bell, LogOut, Settings, MoonStar, CircleHelp, MessageSquareMore } from "lucide-react";
+import { Menu, ChevronLeft, Users, Files, UploadCloud, ArrowLeft, User,  LogOut,  MessageSquareMore } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../service/supabase";
 import Logout from "../../service/auth/Logout";
 
-type Notification = {
-  id: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-};
+
 
 interface AdminNavTopProps {
   userName: string;
@@ -20,9 +15,6 @@ const AdminNavTop: React.FC<AdminNavTopProps> = ({ userName: propUserName }) => 
   const navigate = useNavigate();
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
-  const [isNotificationsOpen, setNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [userName, setUserName] = useState(propUserName);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
@@ -32,17 +24,7 @@ const AdminNavTop: React.FC<AdminNavTopProps> = ({ userName: propUserName }) => 
       if (user) {
         setUserName(user.user_metadata?.full_name || propUserName || "User");
 
-        const { data, error } = await supabase
-          .from("UserNotifications")
-          .select("*")
-          .eq('userID', user.id)
-          .order('timestamp', { ascending: false })
-          .limit(5);
-
-        if (!error && data) {
-          setNotifications(data);
-          setUnreadCount(data.filter(n => !n.read).length);
-        }
+      
       }
     };
 
@@ -66,33 +48,8 @@ const AdminNavTop: React.FC<AdminNavTopProps> = ({ userName: propUserName }) => 
     console.log('User Logout Success');
   };
 
-  const markNotificationsAsRead = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase
-        .from("UserNotifications")
-        .update({ read: true })
-        .eq('userID', user.id)
-        .eq('read', false);
-
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, read: true }))
-      );
-      setUnreadCount(0);
-    }
-  };
-
-  const handleNotificationsToggle = () => {
-    setNotificationsOpen(prev => !prev);
-    setProfileOpen(false);
-    if (!isNotificationsOpen && unreadCount > 0) {
-      markNotificationsAsRead();
-    }
-  };
-
-  const handleProfileToggle = () => {
+    const handleProfileToggle = () => {
     setProfileOpen(prev => !prev);
-    setNotificationsOpen(false);
   };
 
   return (
@@ -117,56 +74,7 @@ const AdminNavTop: React.FC<AdminNavTopProps> = ({ userName: propUserName }) => 
         </div>
 
         <div className="flex gap-4 items-center">
-          <div className="relative">
-            <button
-              onClick={handleNotificationsToggle}
-              className="relative p-1.5 hover:bg-[#5CE1E6] rounded-full transition-colors"
-            >
-              <Bell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
-            {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-md overflow-hidden z-10">
-                <div className="bg-[#06B8BE] text-white p-3 font-medium flex justify-between items-center">
-                  <span>Notifications</span>
-                  <button className="text-xs text-cyan-200 hover:text-white">
-                    Mark all as read
-                  </button>
-                </div>
-                <div className="max-h-80 overflow-y-auto">
-                  {notifications.length > 0 ? (
-                    notifications.map(notification => (
-                      <div
-                        key={notification.id}
-                        className={`p-3 border-b ${notification.read ? 'bg-white' : 'bg-cyan-50'}`}
-                      >
-                        <p className="text-gray-800 text-sm">{notification.message}</p>
-                        <p className="text-gray-500 text-xs mt-1">
-                          {new Date(notification.timestamp).toLocaleString()}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-6 text-center text-gray-500">
-                      No notifications
-                    </div>
-                  )}
-                </div>
-                <div className="bg-gray-50 p-2 text-center">
-                  <button className="text-cyan-600 text-sm hover:text-cyan-800">
-                    View all notifications
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="relative">
+            <div className="relative">
             <button
               onClick={handleProfileToggle}
               className="relative p-1.5 hover:bg-[#5CE1E6] rounded-full transition-colors overflow-hidden"
@@ -202,32 +110,7 @@ const AdminNavTop: React.FC<AdminNavTopProps> = ({ userName: propUserName }) => 
                   </div>
                 </div>
                 <ul className="text-gray-700">
-                  <li className="border-b">
-                    <button
-                      className="p-3 w-full text-left hover:bg-gray-50 flex items-center"
-                      onClick={() => {
-                        navigate('/profile');
-                        setProfileOpen(false);
-                      }}
-                    >
-                      <User className="mr-2 w-4 h-4" /> Profile
-                    </button>
-                  </li>
-                  <li className="border-b">
-                    <button className="p-3 w-full text-left hover:bg-gray-50 flex items-center">
-                      <Settings className="mr-2 w-4 h-4" /> Settings
-                    </button>
-                  </li>
-                  <li className="border-b">
-                    <button className="p-3 w-full text-left hover:bg-gray-50 flex items-center">
-                      <MoonStar className="mr-2 w-4 h-4" /> Appearance
-                    </button>
-                  </li>
-                  <li className="border-b">
-                    <button className="p-3 w-full text-left hover:bg-gray-50 flex items-center">
-                      <CircleHelp className="mr-2 w-4 h-4" /> Help & Support
-                    </button>
-                  </li>
+                  
                   <li>
                     <button
                       className="p-3 w-full text-left hover:bg-red-50 flex items-center text-red-600"
