@@ -16,7 +16,7 @@ import ThesisManagementPage from "./pages/admin/ThesisManagementPage";
 import ThesisUploadPage from "./pages/admin/ThesisUploadPage";
 
 import LoadingScreen from './components/global/LoadingScreen';
-
+import ThesisCommentsModeration from './pages/admin/ThesisCommentsModeration';
 
 
 const App = () => {
@@ -82,6 +82,7 @@ const App = () => {
           <Route path="user-management" element={<UserManagementPage />} />
           <Route path="thesis-management" element={<ThesisManagementPage />} />
           <Route path="thesis-upload" element={<ThesisUploadPage />} />
+          <Route path="comment-management" element={<ThesisCommentsModeration />} />
           <Route index element={<UserManagementPage />} /> {/* Default route under /admin */}
         </Route>
       </Routes>

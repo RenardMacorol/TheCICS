@@ -1,6 +1,6 @@
 // AdminNavTop.tsx
 import React, { useState, useEffect } from "react";
-import { Menu, ChevronLeft, Users, Files, UploadCloud, ArrowLeft, User, Bell, LogOut, Settings, MoonStar, CircleHelp } from "lucide-react";
+import { Menu, ChevronLeft, Users, Files, UploadCloud, ArrowLeft, User, Bell, LogOut, Settings, MoonStar, CircleHelp, MessageSquareMore } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../service/supabase";
 import Logout from "../../service/auth/Logout";
@@ -307,6 +307,20 @@ const AdminNavTop: React.FC<AdminNavTopProps> = ({ userName: propUserName }) => 
                 Thesis Upload
               </button>
             </li>
+            <li>
+              <button
+                className="w-full p-2 flex items-center rounded-md hover:bg-gray-800"
+                onClick={() => {
+                  navigate("/admin/comment-management");
+                  setSidebarOpen(false);
+                }}
+              >
+                <MessageSquareMore className="w-5 h-5 mr-3 text-aqua-400" />
+                Comment Moderation
+              </button>
+            </li>
+
+
             <li>
               <button
                 onClick={() => navigate("/")}
