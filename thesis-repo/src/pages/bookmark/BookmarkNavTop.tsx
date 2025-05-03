@@ -9,7 +9,7 @@ interface SearchProp {
   searchQuery: string;
 }
 
-const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
+const BookmarkNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
   const navigate = useNavigate();
   const [isSideBarOpen, setSideBarOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
@@ -240,4 +240,4 @@ const DashNavTop = ({ setSearchQuery, searchQuery }: SearchProp) => {
   );
 };
 
-export default DashNavTop;
+export default BookmarkNavTop;
