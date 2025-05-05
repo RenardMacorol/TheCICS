@@ -175,12 +175,13 @@ const BookmarkList = ({ searchQuery }: Search) => {
 
 
     return (
-        <div className="px-6 space-y-6 pb-12">{restrict ? 
+        <div className="px-6 space-y-6 pb-12">
+            {restrict ? 
     <p className="flex justify-center items-center font-bold text-5xl text-blue-500">You Are Restricted to this page Please Contact Support -Wonka</p> 
     :
     (
-        <div>
-                            {filteredTheses.length > 0 ? (
+        <div className="px-6 space-y-6 pb-12">
+        {filteredTheses.length > 0 ? (
                 filteredTheses.map((item) => (
                     <div 
                         key={item.thesisID} 
