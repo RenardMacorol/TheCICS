@@ -7,6 +7,9 @@ import Thesis from "../../service/Types/Thesis";
 import { FetchAuthor } from "../../service/ContentManagement/FetchAuthors";
 import { FetchBookmarkThesis } from "../../service/ContentManagement/FetchBookMarkThesis";
 import { handleGithubButton } from "../../service/ContentManagement/handletGithubButton";
+import ValidUser from "../../service/UserHandler/ValidUser";
+import InsertNewUser from "../../service/UserHandler/InsertNewUser";
+import restrictChecker from "../../service/UserHandler/RestrictChecker";
 
 interface Search {
     searchQuery: string;
@@ -21,7 +24,28 @@ const BookmarkList = ({ searchQuery }: Search) => {
     const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null); // Add state for selected thesis
     const [isCitationModalOpen, setIsCitationModalOpen] = useState(false); // Add state for citation modal
     const [authors, setAuthors] = useState<Record<string,string>>({});
+    const [userScanned, setUserScanned] = useState(false);
+
+    const [restrict, setRestrict] = useState(false);
     const navigate = useNavigate(); // Add navigation hook
+    
+    useEffect(() => {
+    const handleUser = async () =>{
+    const {data: {user}} = await supabase.auth.getUser();
+      const validUser = new ValidUser();
+      if(user && await validUser.isValidUser(user)){
+          const newUser = new InsertNewUser();
+          await newUser.insertNewUser(user)
+      setRestrict(await restrictChecker(user.id))
+      }
+    }
+    if(!userScanned){
+    handleUser();
+    setUserScanned(true)
+    }
+
+
+  }, [userScanned]);
 
     useEffect(() => {
         const fetchBookmarkedTheses = async () => {
@@ -151,8 +175,12 @@ const BookmarkList = ({ searchQuery }: Search) => {
 
 
     return (
-        <div className="px-6 space-y-6 pb-12">
-            {filteredTheses.length > 0 ? (
+        <div className="px-6 space-y-6 pb-12">{restrict ? 
+    <p className="flex justify-center items-center font-bold text-5xl text-blue-500">You Are Restricted to this page Please Contact Support -Wonka</p> 
+    :
+    (
+        <div>
+                            {filteredTheses.length > 0 ? (
                 filteredTheses.map((item) => (
                     <div 
                         key={item.thesisID} 
@@ -286,7 +314,12 @@ const BookmarkList = ({ searchQuery }: Search) => {
                     onClose={() => setIsCitationModalOpen(false)}
                 />
             )}
+ 
         </div>
+
+    )
+    }
+       </div>
     );
 };
 
