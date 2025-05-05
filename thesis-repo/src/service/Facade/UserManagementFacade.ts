@@ -29,7 +29,7 @@ export class UserManagementFacade {
     async handleRestrictUser(userID: string): Promise<boolean> {
         const { error } = await supabase
             .from("Users")
-            .update({ status: "Restricted" })
+            .update({ accessType: "Restrict" })
             .eq("userID", userID);
 
         if (error) {
