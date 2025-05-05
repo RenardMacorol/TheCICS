@@ -350,6 +350,7 @@ const ContentList = ({ searchQuery, filters }: ContentListProps) => {
             {/* Citation Modal */}
             {selectedThesis && (
                 <CitationModal
+                    author={authors[selectedThesis.authorID]}
                     thesis={selectedThesis}
                     isOpen={isCitationModalOpen}
                     onClose={() => setIsCitationModalOpen(false)}
