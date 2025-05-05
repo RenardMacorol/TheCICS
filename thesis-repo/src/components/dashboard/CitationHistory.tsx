@@ -83,16 +83,18 @@ const CitationHistory = () => {
 
   const handleCopy = async (thesis: Thesis, format: CitationFormat) => {
     try {
-      const citationText = generateCitation(thesis, format);
+      const citationText = generateCitation(authors[thesis.thesisID],thesis, format);
       await navigator.clipboard.writeText(citationText);
       setCopiedFormat(format);
       setTimeout(() => {
         setCopiedFormat(null);
       }, 2000);
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
-        recordCitation(thesis.thesisID, user.id, 'citation', format);
+        recordCitation(thesis.thesisID, user.id, "citation", format);
       }
     } catch (err) {
       console.error("Failed to copy citation:", err);
@@ -206,7 +208,7 @@ const CitationHistory = () => {
             </div>
 
             <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-3 rounded-md mb-4">
-              {generateCitation(selectedThesis, copiedFormat || "apa")}
+              {generateCitation(authors[selectedThesis.authorID],selectedThesis, copiedFormat || "apa")}
             </p>
 
             <p className="text-xs text-gray-500 dark:text-gray-400">
