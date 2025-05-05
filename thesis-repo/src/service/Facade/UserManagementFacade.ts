@@ -13,7 +13,7 @@ export class UserManagementFacade {
     async handleActivateUser(userID: string): Promise<boolean> {
         const { error } = await supabase
             .from("Users")
-            .update({ status: "Active" })
+            .update({ accessType: "Active" })
             .eq("userID", userID);
 
         if (error) {
