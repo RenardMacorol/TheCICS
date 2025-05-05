@@ -2,7 +2,7 @@
   import { useParams } from "react-router-dom";
   import { supabase } from "../../service/supabase";
   import DashNavTop from '../../components/dashboard/DashNavTop';
-  import FilterButton from "../../components/dashboard/FilterButton";
+  // import FilterButton from "../../components/dashboard/FilterButton";
 import { AddViewer } from "../../service/ContentManagement/AddThesisView";
 import LoadingThesisDetails from "../../components/global/LoadingThesisDetails";
 
@@ -250,7 +250,7 @@ import LoadingThesisDetails from "../../components/global/LoadingThesisDetails";
     return (
       <div className="bg-gray-100 min-h-screen text-white">
         <DashNavTop setSearchQuery={() => { } } searchQuery={""} />
-        <FilterButton />
+        {/* <FilterButton /> */}
 
         <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-5 text-black">
           <h1 className="text-2xl font-bold mb-4">{thesis.title}</h1>
@@ -268,7 +268,7 @@ import LoadingThesisDetails from "../../components/global/LoadingThesisDetails";
             <p className="text-gray-700">{thesis.keywords}</p>
           </div>
 
-          <div className="mt-4">
+          <div className="mt-4">      
             <a
               href={thesis.pdfFileUrl}
               target="_blank"
@@ -281,9 +281,9 @@ import LoadingThesisDetails from "../../components/global/LoadingThesisDetails";
 
           <button
             onClick={handleLike}
-            className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+            className="mt-4 bg-violet-500 text-white px-4 py-2 rounded-lg hover:bg-vilet-600"
           >
-            Like ❤️ ({likes})  
+            Like 💜 ({likes})  
           </button> 
 
           <div className="mt-6">
@@ -293,7 +293,7 @@ import LoadingThesisDetails from "../../components/global/LoadingThesisDetails";
                 <p className="text-gray-500">No comments yet.</p>
               ) : (
                 comments.map((comment) => (
-                  <div key={comment.commentID} className="bg-gray-200 p-2 rounded-md my-2">
+                  <div key={comment.commentID} className="bg-violet-200 p-3 rounded-md my-3">
                     <p className="text-sm text-gray-600">
                     <strong>{comment.Users?.name || comment.username}</strong> • {new Date(comment.createdAt).toLocaleString()}
                     </p>
