@@ -4,6 +4,7 @@ import { Fetchable } from "../Types/Fetchable";
 import Thesis from '../Types/Thesis';
 import { countCommentByThesisID } from "./FetchCountComment";
 import { CountViewByThesisID } from "./FetchCountView";
+import { CountLikeByThesisID } from "./FetchCountLikes"; 
 
 export class FetchBookmarkThesis extends ThesisBase implements Fetchable<Thesis> {
   private bookmarkIds: string[]; // or number[], depending on your data
@@ -27,15 +28,18 @@ export class FetchBookmarkThesis extends ThesisBase implements Fetchable<Thesis>
 
     const counterComment = new countCommentByThesisID();
     const counterView = new CountViewByThesisID();
+    const counterLike = new CountLikeByThesisID();
 
     const thesesCountStats = await Promise.all(
       thesesData.map(async (thesis) => {
         const commentCount = await counterComment.fetchCount(thesis.thesisID);
         const viewCount = await counterView.fetchCount(thesis.thesisID);
+        const likeCount = await counterLike.fetchCount(thesis.thesisID);
         return {
           ...thesis,
           comments: commentCount ?? 0,
           views: viewCount ?? 0,
+          likes: likeCount ?? 0,
         };
       })
     );
