@@ -319,6 +319,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
             {/* Add Citation Modal */}
             {selectedThesis && (
                 <CitationModal
+                    author={authors[selectedThesis.authorID]}
                     thesis={selectedThesis}
                     isOpen={isCitationModalOpen}
                     onClose={() => setIsCitationModalOpen(false)}

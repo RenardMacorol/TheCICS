@@ -16,6 +16,7 @@ export type CitationStats = {
 
 export type CitationModalProps = {
   thesis: Thesis | null;
+  author: string;
   isOpen: boolean;
   onClose: () => void;
 };
@@ -33,11 +34,11 @@ export const formatDescriptions = {
 };
 
 // Generate citation text based on thesis data and format
-export const generateCitation = (thesis: Thesis, format: CitationFormat): string => {
+export const generateCitation = (auhtor:string ,thesis: Thesis, format: CitationFormat): string => {
   const thesisLink = `https://the-cics.vercel.app/thesis/${thesis.thesisID}`;
   
   // Format author name
-  const authorName = thesis.authorName || `Author ${thesis.authorID}`;
+  const authorName = thesis.authorName || `Author ${auhtor}`;
   const authorParts = authorName.split(' ');
   const lastName = authorParts.pop() || '';
   const firstInitial = authorParts.length > 0 ? authorParts[0].charAt(0) : '';

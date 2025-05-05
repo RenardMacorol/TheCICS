@@ -14,7 +14,7 @@ import {
   recordCitation as recordCitationAction
 } from "../../service/citation/citationUtils";
 
-const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
+const CitationModal = ({ author ,thesis, isOpen, onClose }: CitationModalProps) => {
   const [copied, setCopied] = useState<CopyState>({
     citation: false,
     link: false
@@ -67,7 +67,7 @@ const CitationModal = ({ thesis, isOpen, onClose }: CitationModalProps) => {
   
   const thesisLink = `https://the-cics.vercel.app/thesis/${thesis.thesisID}`;
   const formattedDate = getCurrentFormattedDate();
-  const citationText = generateCitation(thesis, citationFormat);
+  const citationText = generateCitation(author, thesis, citationFormat);
   
   const handleCopy = async (type: 'citation' | 'link') => {
     const textToCopy = type === 'citation' ? citationText : thesisLink;
