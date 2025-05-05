@@ -175,7 +175,13 @@ import LoadingThesisDetails from "../../components/global/LoadingThesisDetails";
           setHasLiked(true);
         }
       } else {
-        console.warn("You already liked this thesis.");
+        const {error: unlikeError} =await supabase.from("like").delete().eq("thesisID",thesisID).eq("user_id", user.id)
+        if(unlikeError){
+          console.log("unlike errro",error)
+        }
+          setLikes((prev) => Math.max(prev-1,0))
+          setHasLiked(false)
+          console.log("Unlike done succesfully")
       }
     };
     
