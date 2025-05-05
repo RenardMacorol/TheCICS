@@ -175,20 +175,22 @@ const BookmarkList = ({ searchQuery }: Search) => {
 
 
     return (
-        <div className="px-6 space-y-6 pb-12">{restrict ? 
+        <div className="px-6 space-y-6 pb-12">
+            {restrict ? 
     <p className="flex justify-center items-center font-bold text-5xl text-blue-500">You Are Restricted to this page Please Contact Support -Wonka</p> 
     :
     (
-        <div>
-                            {filteredTheses.length > 0 ? (
+        <div className="px-6 space-y-6 pb-12">
+        {filteredTheses.length > 0 ? (
                 filteredTheses.map((item) => (
                     <div 
                         key={item.thesisID} 
-                        className="flex flex-col bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border-l-4 border-violet-500"
+
+                    className="flex flex-col bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                     >
                         <div className="flex">
                             {/* Thumbnail Preview */}
-                            <div className="w-36 h-28 bg-violet-50 flex items-center justify-center rounded-md overflow-hidden">
+                        <div className="w-36 h-28 bg-violet-50 dark:bg-gray-700 flex items-center justify-center rounded-md overflow-hidden">
                                 <BookOpen size={36} className="text-violet-400" />
                             </div>
                             
@@ -197,7 +199,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                 <div className="flex justify-between">
                                     {/* Update title to be clickable */}
                                     <h3 
-                                        className="text-lg font-bold text-gray-800 mb-1 cursor-pointer hover:text-violet-500"
+                                 className="text-lg font-bold text-gray-800 dark:text-white mb-1 cursor-pointer hover:text-violet-500" 
                                         onClick={() => handleThesisClick(item.thesisID)}
                                     >
                                         {item.title}
@@ -210,7 +212,7 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                         <Star className="w-5 h-5 text-cyan-400 fill-cyan-400" />
                                     </button>
                                 </div>
-                                <p className="text-sm text-gray-600 mb-2">
+                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                                     By <span className="font-medium">{authors[item.authorID]}</span> • Published {item.publicationYear}
                                 </p>
                                 <div className="flex gap-2 mb-2 flex-wrap">
@@ -222,78 +224,86 @@ const BookmarkList = ({ searchQuery }: Search) => {
                                 </div>
                                 
                                 {/* Stats Row */}
-                                <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                                    <div className="flex items-center gap-1">
-                                        <Eye size={14} />
+                                <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div className="flex items-center gap-1">
+                                    <Eye size={14} />
                                     <span>{item.views !==  null && item.views !== undefined ? item.views: 0}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <ThumbsUp size={14} />
-                                    <span>{item.likes !==  null && item.likes !== undefined ? item.likes: 0}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <MessageSquare size={14} />
-                                    <span>{item.comments !==  null && item.comments !== undefined ? item.comments: 0}</span>
-                                    </div>
                                 </div>
+                                <div className="flex items-center gap-1">
+                                    <ThumbsUp size={14} />
+                                    <span>{item.likes !==  null && item.likes !== undefined ? item.likes: 0}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <MessageSquare size={14} />
+                                    <span>{item.comments !==  null && item.comments !== undefined ? item.comments: 0}</span>
+                                </div>
+                            </div>
                             </div>
                         </div>
 
                         {/* Abstract Section - Expandable */}
-                        <div className="mt-3 pt-3 border-t border-gray-100">
-                            <button 
-                                onClick={() => toggleAbstract(item.thesisID)}
-                                className="text-sm text-violet-600 hover:text-violet-800 mb-2 flex items-center"
-                            >
-                                {expandedAbstracts[item.thesisID] ? "Hide Abstract" : "Show Abstract"}
-                            </button>
-                            
-                            {expandedAbstracts[item.thesisID] && (
-                                <div className="animate-fadeIn">
-                                    <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded-md">
-                                        {item.abstract}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
+
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                        <button 
+                            onClick={() => toggleAbstract(item.thesisID)}
+                            className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 mb-2 flex items-center"
+                        >
+                            {expandedAbstracts[item.thesisID] ? "Hide Abstract" : "Show Abstract"}
+                        </button>
+                        
+                        {expandedAbstracts[item.thesisID] && (
+                            <div className="animate-fadeIn">
+                                <p className="text-gray-700 dark:text-gray-300 text-sm bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
+                                    {item.abstract}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+
 
                         {/* Action Buttons */}
-                        <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-                            <div className="flex items-center gap-2">
-                                <button className="flex items-center gap-1 text-violet-600 hover:text-violet-800 text-sm">
-                                    <ThumbsUp size={16} />
-                                    <span>Like</span>
-                                </button>
-                                <button className="flex items-center gap-1 text-violet-600 hover:text-violet-800 text-sm">
-                                    <MessageSquare size={16} />
-                                    <span>Comment</span>
-                                </button>
-                                {/* Update Cite button to open the citation modal */}
-                                <button 
-                                    onClick={() => handleShareClick(item)}
-                                    className="flex items-center gap-1 text-violet-600 hover:text-violet-800 text-sm"
-                                >
-                                    <Share2 size={16} />
-                                    <span>Cite</span>
-                                </button>
-                            </div>
+                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                        <div className="flex items-center gap-2">
+                            {/* 
+                             <button className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm">
+                                <ThumbsUp size={16} />
+                                <span>Like</span>
+                            </button>
+                           <button className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm">
+                                <MessageSquare size={16} />
+                                <span>Comment</span>
+                            </button>
+
                             
-                            <div className="flex gap-2">
-                                <button 
-                                onClick={() => handleGithubButton(item.githubURL!)}
-                                className="flex items-center gap-1 bg-violet-100 text-violet-700 rounded-full px-3 py-1 text-sm hover:bg-violet-200 transition-colors">
-                                    <Github size={16} />
-                                    <span>Code</span>
-                                </button>
-                                <button 
-                                    onClick={() => handleThesisClick(item.thesisID)}
-                                    className="flex items-center gap-1 bg-cyan-100 text-cyan-700 rounded-full px-3 py-1 text-sm hover:bg-cyan-200 transition-colors"
-                                >
-                                    <BookOpen size={16} />
-                                    <span>Read</span>
-                                </button>
-                            </div>
+                            */}
+                            <button 
+                                onClick={() => handleShareClick(item)}
+                                className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm"
+                            >
+                                <Share2 size={16} />
+                                <span>Cite</span>
+                            </button>
                         </div>
+                        
+                        <div className="flex gap-2">
+                            <button 
+                            onClick={() => handleGithubButton(item.githubURL!)}
+                            className="flex items-center gap-1 bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-200 rounded-full px-3 py-1 text-sm hover:bg-violet-200 dark:hover:bg-violet-800 transition-colors">
+                                <Github size={16} />
+                                <span>Code</span>
+                            </button>
+                            <button 
+                                onClick={() => handleThesisClick(item.thesisID)}
+                                className="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 text-sm"
+                            >
+                                <BookOpen size={16} />
+                                <span>Read</span>
+                            </button>
+                        </div>
+                    </div>
+                           
+                        
                     </div>
                 ))
             ) : (
