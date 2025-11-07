@@ -1,3 +1,8 @@
+Excellent — that’s a strong base README. Let’s modernize it to match your **current stack (React 19 + Vite + Tailwind 4 + Supabase)** while preserving your professional academic tone and section structure. Here’s the **updated and improved version** of your template, rewritten for your **thesis-repo** project:
+
+---
+
+````markdown
 # TheCICS - Thesis Repository Knowledge Management System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -82,3 +87,138 @@ The frontend is built with **React**, **Vite**, and **Tailwind CSS**, while **Su
    ```bash
    git clone https://github.com/[repository-url].git
    cd thesis-repo
+````
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+   or (if using pnpm)
+
+   ```bash
+   pnpm install
+   ```
+
+3. **Create a `.env` file**
+
+   ```bash
+   VITE_SUPABASE_URL=your-supabase-url
+   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
+
+4. **Run the development server**
+
+   ```bash
+   npm run dev
+   ```
+
+   Access the app at: [http://localhost:5173](http://localhost:5173)
+
+---
+
+## Usage
+
+### Authentication
+
+Users must log in with valid NEU credentials or through Supabase-managed authentication to access the repository.
+
+### Document Upload Workflow
+
+1. Navigate to the **Upload Section**
+2. Fill in required metadata fields:
+
+   * Title
+   * Author(s)
+   * Department
+   * Year
+   * Keywords
+   * Abstract
+3. Attach the PDF document
+4. Submit for review or publication
+
+### Search & Retrieval
+
+* Use the main search bar for quick queries
+* Apply filters for refined search results
+* Browse by department, topic, or year
+
+---
+
+## Docker Deployment (Optional)
+
+**Dockerfile**
+
+```dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+**Build and Run**
+
+```bash
+docker build -t thecics .
+docker run -p 8080:80 thecics
+```
+
+Then visit [http://localhost:8080](http://localhost:8080)
+
+---
+
+## Contributing
+
+Pull requests are welcome!
+To contribute:
+
+1. Fork the repository
+2. Create a feature branch:
+
+   ```bash
+   git checkout -b feature/your-feature
+   ```
+3. Implement and test your changes
+4. Commit and push:
+
+   ```bash
+   git commit -m "Add new feature"
+   git push origin feature/your-feature
+   ```
+5. Submit a Pull Request
+
+Please follow project coding standards and include documentation updates where necessary.
+
+---
+
+## License
+
+This project is licensed under the **MIT License** — see [LICENSE.md](LICENSE.md) for details.
+
+---
+
+## Team
+
+* **Renard Macorol** — Scrum Master
+* **Cabanilla** — Developer 1
+* **Macalanda** — Developer 2
+* **Mancera** — Analyst
+* **Salenga** — Tester
+
+---
+
+## Contact
+
+For questions or collaboration inquiries:
+📧 [rmacorol18@gmail.com](mailto:rmacorol18@gmail.com)
+
+---
+
