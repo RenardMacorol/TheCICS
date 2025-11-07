@@ -4,6 +4,8 @@
 
 A centralized digital repository system designed to streamline thesis management and accessibility for NEU students and faculty members.
 
+---
+
 ## Table of Contents
 
 * [Overview](#overview)
@@ -13,136 +15,70 @@ A centralized digital repository system designed to streamline thesis management
 * [Usage](#usage)
 * [Contributing](#contributing)
 * [License](#license)
+* [Team](#team)
+* [Contact](#contact)
+* [Changelog](#changelog)
+
+---
 
 ## Overview
 
-TheCICS addresses the growing challenge of managing and accessing research papers within academic institutions. This system provides a structured approach to storing, categorizing, and retrieving thesis documents, enabling efficient knowledge sharing across the university community.
+**TheCICS** addresses the increasing challenge of managing and accessing research outputs within academic institutions. This system offers a structured digital repository where students and faculty can upload, categorize, and retrieve thesis documents efficiently.  
+
+The frontend is built with **React**, **Vite**, and **Tailwind CSS**, while **Supabase** provides backend services such as authentication, database management, and file storage.
+
+---
 
 ## Features
 
-🔍 Advanced Search Capabilities
-- Topic-based filtering
-- Author search functionality
-- Year-specific queries
-- Keyword matching
-- Full-text search integration
+🔍 **Advanced Search Capabilities**
+- Keyword and full-text search
+- Department and year filtering
+- Author-based lookup
+- Tag and topic categorization
 
-📄 Document Management
-- PDF preview system
-- Automated citation generation
+📄 **Document Management**
+- PDF upload and preview
+- Metadata and citation management
 - Version control
-- Metadata management
+- Automated organization by department/year
 
-🔒 Security & Access Control
-- NEU student/faculty authentication
-- Role-based permissions
-- Secure document storage
-- Activity logging
+🔒 **Security & Access Control**
+- Supabase-based authentication
+- Role-based access (admin, faculty, student)
+- Secure file storage
+- Activity logging for audit trail
 
-🎯 User Experience
-- Responsive design
-- Intuitive interface
-- Mobile optimization
-- Accessibility compliance
+🎯 **User Experience**
+- Responsive and accessible UI
+- Modern, minimal design with Tailwind CSS
+- Fast, real-time updates powered by Supabase
+- Mobile-first optimization
+
+---
 
 ## Technical Requirements
 
 ### Server Requirements
-- PHP 8.0+
-- MySQL 8.0+
-- Composer
-- Node.js (for frontend development)
+- Node.js 20+
+- npm or pnpm
+- Supabase account (for backend)
+- Optional: Docker for containerized deployment
 
-### Development Dependencies
-- Tailwind CSS
-- Laravel Framework
-- Elasticsearch (optional)
+### Frontend Dependencies
+- React 19
+- Vite 6
+- Tailwind CSS 4
+- Supabase JS SDK
+- React Router DOM 7
+- Lucide React (for icons)
+- TypeScript (for static typing)
+
+---
 
 ## Installation
 
-1. Clone the repository:
+1. **Clone the repository**
    ```bash
    git clone https://github.com/[repository-url].git
-   ```
-   
-2. Set up the environment:
-   ```bash
-   cp .env.example .env
-   composer install
-   php artisan migrate
-   ```
-
-3. Configure the database:
-   ```php
-   // .env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=thecics_db
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
-
-4. Install frontend dependencies:
-   ```bash
-   npm install
-   npm run dev
-   ```
-
-## Usage
-
-### Authentication
-Users must authenticate using valid NEU credentials before accessing the system.
-
-### Document Upload Process
-1. Navigate to the upload section
-2. Fill required metadata fields:
-   - Title
-   - Authors
-   - Department
-   - Keywords
-   - Abstract
-3. Attach PDF document
-4. Submit for review
-
-### Search Functionality
-- Use the main search bar for quick queries
-- Apply filters for advanced searching
-- Browse by department/year for categorized access
-
-## Contributing
-
-Pull requests are welcome! To contribute:
-
-1. Fork the repository
-2. Create a feature branch
-3. Implement changes
-4. Add tests
-5. Submit pull request
-
-Please ensure all contributions align with our coding standards and include proper documentation.
-
-## License
-
-This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) for details.
-
-## Team
-- [Macorol] - Scrum Master
-- [Cabanilla] - Developr 1
-- [Macalanda] - Developer 2
-- [Mancera] - Analyst
-- [Salenga] - Tester
-
-  
-## Contact
-
-For questions or concerns, please contact:
-[Renard Macorol](rmacorol18@gmail.com)
-
-## Changelog
-
-v0.0.0 - Planning
-- Finalized System Design
-- Finalized Primary Assets
-- Static Implementation
-
+   cd thesis-repo
