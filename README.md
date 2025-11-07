@@ -1,8 +1,4 @@
-Excellent — that’s a strong base README. Let’s modernize it to match your **current stack (React 19 + Vite + Tailwind 4 + Supabase)** while preserving your professional academic tone and section structure. Here’s the **updated and improved version** of your template, rewritten for your **thesis-repo** project:
 
----
-
-````markdown
 # TheCICS - Thesis Repository Knowledge Management System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
